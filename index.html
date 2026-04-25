@@ -12,93 +12,108 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-        body { background-color: var(--white); color: var(--charcoal); line-height: 1.6; }
+        body { background-color: var(--white); color: var(--charcoal); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        header { padding: 2rem; display: flex; align-items: center; justify-content: space-between; }
-        .logo { font-weight: 900; font-size: 1.5rem; letter-spacing: -1px; text-transform: uppercase; cursor: pointer; color: var(--charcoal); text-decoration: none; }
+        header { padding: 2rem; position: absolute; top: 0; left: 0; width: 100%; z-index: 10; }
+        .logo { font-weight: 900; font-size: 1.5rem; letter-spacing: -1px; text-transform: uppercase; cursor: pointer; text-decoration: none; color: var(--charcoal); }
 
-        section { padding: 4rem 2rem; max-width: 800px; margin: 0 auto; }
-        h1 { font-size: 4rem; text-transform: uppercase; line-height: 0.9; margin-bottom: 2rem; }
+        #app-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .step { display: none; opacity: 0; transition: opacity 0.6s ease-in-out; text-align: center; width: 100%; max-width: 500px; }
+        .step.active { display: block; opacity: 1; }
 
-        .selector-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
-        .item-card { border: 2px solid var(--charcoal); padding: 1.5rem; text-align: center; cursor: pointer; transition: 0.2s; }
-        .item-card:hover { border-color: var(--orange); }
-        .item-card.active { border-color: var(--orange); background: var(--orange); color: var(--white); }
-        .item-card svg { width: 40px; height: 40px; margin-bottom: 10px; }
+        h1 { font-size: 2.5rem; text-transform: uppercase; margin-bottom: 2rem; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .card { border: 2px solid var(--charcoal); padding: 2rem; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        .card:hover { border-color: var(--orange); background: var(--orange); color: var(--white); }
 
-        .btn-cta { background: var(--charcoal); color: var(--white); padding: 1.5rem 3rem; border: none; font-size: 1.2rem; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; margin-top: 2rem; }
-        .btn-cta:hover { background: var(--orange); }
+        #recipe-display { text-align: left; background: #f9f9f9; padding: 2rem; border: 1px solid #eee; }
+        .nutrient-bar { height: 8px; background: #ddd; margin: 10px 0; }
+        .nutrient-fill { height: 100%; background: var(--orange); width: 80%; }
 
-        #results { display: none; padding-top: 2rem; border-top: 1px solid #ccc; }
-        
-        footer { padding: 4rem 2rem; border-top: 1px solid #eee; text-align: center; color: #888; font-size: 0.8rem; }
+        footer { padding: 1rem; text-align: center; font-size: 0.6rem; color: #aaa; border-top: 1px solid #eee; }
     </style>
 </head>
 <body>
 
     <header>
-        <a href="#" onclick="location.reload()" class="logo">What's for Dinner</a>
+        <a href="javascript:location.reload()" class="logo">What's for Dinner</a>
     </header>
 
-    <main>
-        <section id="landing">
-            <h1>Select your fuel.</h1>
-            
-            <p>Protein</p>
-            <div class="selector-grid" id="protein-grid">
-                <div class="item-card" onclick="select(this)">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
-                    <p>Salmon</p>
-                </div>
-                <div class="item-card" onclick="select(this)">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
-                    <p>Beef</p>
-                </div>
+    <main id="app-container">
+        <div id="step-1" class="step active">
+            <h1>Select Protein</h1>
+            <div class="grid">
+                <div class="card" onclick="saveChoice('protein', 'Salmon', 'step-2')">Salmon</div>
+                <div class="card" onclick="saveChoice('protein', 'Beef', 'step-2')">Beef</div>
             </div>
+        </div>
 
-            <p>Carbohydrate</p>
-            <div class="selector-grid" id="carb-grid">
-                <div class="item-card" onclick="select(this)">
-                    <p>Quinoa</p>
-                </div>
-                <div class="item-card" onclick="select(this)">
-                    <p>Sweet Potato</p>
-                </div>
+        <div id="step-2" class="step">
+            <h1>Select Carb</h1>
+            <div class="grid">
+                <div class="card" onclick="saveChoice('carb', 'Quinoa', 'step-3')">Quinoa</div>
+                <div class="card" onclick="saveChoice('carb', 'Sweet Potato', 'step-3')">Sweet Potato</div>
             </div>
+        </div>
 
-            <p>Store</p>
-            <div class="selector-grid" id="store-grid">
-                <div class="item-card" onclick="select(this)">Lidl</div>
-                <div class="item-card" onclick="select(this)">Dunnes</div>
-                <div class="item-card" onclick="select(this)">Aldi</div>
+        <div id="step-3" class="step">
+            <h1>Select Store</h1>
+            <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                <div class="card" onclick="saveChoice('store', 'Lidl', 'step-4')">Lidl</div>
+                <div class="card" onclick="saveChoice('store', 'Dunnes', 'step-4')">Dunnes</div>
+                <div class="card" onclick="saveChoice('store', 'Aldi', 'step-4')">Aldi</div>
             </div>
+        </div>
 
-            <button class="btn-cta" onclick="startProject()">Start Project</button>
-        </section>
-
-        <section id="results">
-            <h1>Dinner Ready.</h1>
-            <p>Based on your selections, here is your high-performance meal.</p>
-            </section>
+        <div id="step-4" class="step">
+            <h1>Dinner Ready</h1>
+            <div id="recipe-display">
+                <h3 id="recipe-title"></h3>
+                <p id="recipe-desc" style="margin: 1rem 0;"></p>
+                <div class="nutrient-bar"><div class="nutrient-fill"></div></div>
+                <small>Optimized for 70kg Maintenance</small>
+            </div>
+            <button onclick="location.reload()" style="margin-top:20px; padding: 1rem 2rem; background: var(--charcoal); color: white; border: none; font-weight: bold; cursor: pointer; width: 100%;">RESTART</button>
+        </div>
     </main>
 
     <footer>
         <p>&copy; 2026 What's for Dinner. All Rights Reserved.</p>
-        <p>support@whatsfordinner.app</p>
     </footer>
 
     <script>
-        function select(el) {
-            // Remove active from siblings
-            el.parentElement.querySelectorAll('.item-card').forEach(i => i.classList.remove('active'));
-            // Add active to clicked
-            el.classList.add('active');
+        const state = { protein: '', carb: '', store: '' };
+
+        function saveChoice(key, value, nextId) {
+            state[key] = value;
+            if(nextId === 'step-4') {
+                renderResult();
+            }
+            nextStep(nextId);
         }
 
-        function startProject() {
-            document.getElementById('landing').style.display = 'none';
-            document.getElementById('results').style.display = 'block';
-            window.scrollTo(0, 0);
+        function nextStep(nextId) {
+            const current = document.querySelector('.step.active');
+            current.classList.remove('active');
+            setTimeout(() => {
+                current.style.display = 'none';
+                const next = document.getElementById(nextId);
+                next.style.display = 'block';
+                setTimeout(() => next.classList.add('active'), 50);
+            }, 600);
+        }
+
+        function renderResult() {
+            const recipes = {
+                "Salmon|Quinoa": "Lemon-Herb Crusted Salmon served over a fluffy Quinoa bed with sautéed spinach. Rich in Omega-3s.",
+                "Salmon|Sweet Potato": "Oven-baked Salmon Fillet paired with roasted Sweet Potato wedges and steamed broccoli.",
+                "Beef|Quinoa": "Pan-seared Beef strips with a Quinoa stir-fry, peppers, and onions. High iron and B12 content.",
+                "Beef|Sweet Potato": "Grilled Lean Steak with garlic-infused Sweet Potato mash and kale. Optimized for post-workout recovery."
+            };
+
+            const key = `${state.protein}|${state.carb}`;
+            document.getElementById('recipe-title').innerText = `${state.protein} & ${state.carb} at ${state.store}`;
+            document.getElementById('recipe-desc').innerText = recipes[key] || "Custom fusion meal created for your nutritional needs.";
         }
     </script>
 </body>
