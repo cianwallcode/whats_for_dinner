@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What's for Dinner</title>
+    <style>
+        :root {
+            --orange: #FF8C00;
+            --white: #FFFFFF;
+            --charcoal: #222222;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        body { background-color: var(--white); color: var(--charcoal); line-height: 1.6; }
+
+        header { padding: 2rem; display: flex; align-items: center; justify-content: space-between; }
+        .logo { font-weight: 900; font-size: 1.5rem; letter-spacing: -1px; text-transform: uppercase; cursor: pointer; color: var(--charcoal); text-decoration: none; }
+
+        section { padding: 4rem 2rem; max-width: 800px; margin: 0 auto; }
+        h1 { font-size: 4rem; text-transform: uppercase; line-height: 0.9; margin-bottom: 2rem; }
+
+        .selector-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
+        .item-card { border: 2px solid var(--charcoal); padding: 1.5rem; text-align: center; cursor: pointer; transition: 0.2s; }
+        .item-card:hover { border-color: var(--orange); }
+        .item-card.active { border-color: var(--orange); background: var(--orange); color: var(--white); }
+        .item-card svg { width: 40px; height: 40px; margin-bottom: 10px; }
+
+        .btn-cta { background: var(--charcoal); color: var(--white); padding: 1.5rem 3rem; border: none; font-size: 1.2rem; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; margin-top: 2rem; }
+        .btn-cta:hover { background: var(--orange); }
+
+        #results { display: none; padding-top: 2rem; border-top: 1px solid #ccc; }
+        
+        footer { padding: 4rem 2rem; border-top: 1px solid #eee; text-align: center; color: #888; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="#" onclick="location.reload()" class="logo">What's for Dinner</a>
+    </header>
+
+    <main>
+        <section id="landing">
+            <h1>Select your fuel.</h1>
+            
+            <p>Protein</p>
+            <div class="selector-grid" id="protein-grid">
+                <div class="item-card" onclick="select(this)">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>
+                    <p>Salmon</p>
+                </div>
+                <div class="item-card" onclick="select(this)">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+                    <p>Beef</p>
+                </div>
+            </div>
+
+            <p>Carbohydrate</p>
+            <div class="selector-grid" id="carb-grid">
+                <div class="item-card" onclick="select(this)">
+                    <p>Quinoa</p>
+                </div>
+                <div class="item-card" onclick="select(this)">
+                    <p>Sweet Potato</p>
+                </div>
+            </div>
+
+            <p>Store</p>
+            <div class="selector-grid" id="store-grid">
+                <div class="item-card" onclick="select(this)">Lidl</div>
+                <div class="item-card" onclick="select(this)">Dunnes</div>
+                <div class="item-card" onclick="select(this)">Aldi</div>
+            </div>
+
+            <button class="btn-cta" onclick="startProject()">Start Project</button>
+        </section>
+
+        <section id="results">
+            <h1>Dinner Ready.</h1>
+            <p>Based on your selections, here is your high-performance meal.</p>
+            </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 What's for Dinner. All Rights Reserved.</p>
+        <p>support@whatsfordinner.app</p>
+    </footer>
+
+    <script>
+        function select(el) {
+            // Remove active from siblings
+            el.parentElement.querySelectorAll('.item-card').forEach(i => i.classList.remove('active'));
+            // Add active to clicked
+            el.classList.add('active');
+        }
+
+        function startProject() {
+            document.getElementById('landing').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
