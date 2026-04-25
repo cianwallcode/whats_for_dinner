@@ -4,91 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>What's for Dinner</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><path d=%22M2 16L10 24L30 8%22 stroke=%22%23FF8C00%22 stroke-width=%224%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 fill=%22none%22/></svg>">
+    
     <style>
-        :root {
-            --orange: #FF8C00;
-            --white: #FFFFFF;
-            --charcoal: #222222;
-        }
-
+        :root { --orange: #FF8C00; --white: #FFFFFF; --charcoal: #222222; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
         body { background-color: var(--white); color: var(--charcoal); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-
         header { padding: 2rem; position: absolute; top: 0; left: 0; width: 100%; z-index: 10; }
-        .logo { font-weight: 900; font-size: 1.5rem; letter-spacing: -1px; text-transform: uppercase; cursor: pointer; text-decoration: none; color: var(--charcoal); }
+        .logo { font-weight: 900; font-size: 1.5rem; letter-spacing: -1px; text-transform: uppercase; text-decoration: none; color: var(--charcoal); }
 
         #app-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; }
         .step { display: none; opacity: 0; transition: opacity 0.6s ease-in-out; text-align: center; width: 100%; max-width: 500px; }
         .step.active { display: block; opacity: 1; }
 
-        h1 { font-size: 2.5rem; text-transform: uppercase; margin-bottom: 2rem; }
+        h1 { font-size: 2rem; text-transform: uppercase; margin-bottom: 2rem; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .card { border: 2px solid var(--charcoal); padding: 2rem; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        .card { border: 2px solid var(--charcoal); padding: 1.5rem; cursor: pointer; transition: 0.2s; font-weight: bold; }
         .card:hover { border-color: var(--orange); background: var(--orange); color: var(--white); }
 
-        #recipe-display { text-align: left; background: #f9f9f9; padding: 2rem; border: 1px solid #eee; }
-        .nutrient-bar { height: 8px; background: #ddd; margin: 10px 0; }
-        .nutrient-fill { height: 100%; background: var(--orange); width: 80%; }
-
+        table { width: 100%; margin-top: 1rem; border-collapse: collapse; text-align: left; }
+        th, td { padding: 0.5rem; border-bottom: 1px solid #eee; }
+        
         footer { padding: 1rem; text-align: center; font-size: 0.6rem; color: #aaa; border-top: 1px solid #eee; }
     </style>
 </head>
 <body>
 
-    <header>
-        <a href="javascript:location.reload()" class="logo">What's for Dinner</a>
-    </header>
+    <header><a href="javascript:location.reload()" class="logo">What's for Dinner</a></header>
 
     <main id="app-container">
         <div id="step-1" class="step active">
-            <h1>Select Protein</h1>
-            <div class="grid">
-                <div class="card" onclick="saveChoice('protein', 'Salmon', 'step-2')">Salmon</div>
-                <div class="card" onclick="saveChoice('protein', 'Beef', 'step-2')">Beef</div>
-            </div>
+            <h1>Select Gender</h1>
+            <div class="grid"><div class="card" onclick="saveChoice('gender', 'Male', 'step-2')">Male</div><div class="card" onclick="saveChoice('gender', 'Female', 'step-2')">Female</div></div>
         </div>
 
         <div id="step-2" class="step">
-            <h1>Select Carb</h1>
-            <div class="grid">
-                <div class="card" onclick="saveChoice('carb', 'Quinoa', 'step-3')">Quinoa</div>
-                <div class="card" onclick="saveChoice('carb', 'Sweet Potato', 'step-3')">Sweet Potato</div>
-            </div>
+            <h1>Weight Category</h1>
+            <div class="grid"><div class="card" onclick="saveChoice('weight', '50-70kg', 'step-3')">50-70kg</div><div class="card" onclick="saveChoice('weight', '70kg+', 'step-4')">70kg+</div></div>
         </div>
 
         <div id="step-3" class="step">
-            <h1>Select Store</h1>
-            <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;">
-                <div class="card" onclick="saveChoice('store', 'Lidl', 'step-4')">Lidl</div>
-                <div class="card" onclick="saveChoice('store', 'Dunnes', 'step-4')">Dunnes</div>
-                <div class="card" onclick="saveChoice('store', 'Aldi', 'step-4')">Aldi</div>
-            </div>
+            <h1>Protein</h1>
+            <div class="grid"><div class="card" onclick="saveChoice('protein', 'Salmon', 'step-4')">Salmon</div><div class="card" onclick="saveChoice('protein', 'Chicken', 'step-4')">Chicken</div><div class="card" onclick="saveChoice('protein', 'Beef', 'step-4')">Beef</div></div>
         </div>
 
         <div id="step-4" class="step">
+            <h1>Carbohydrate</h1>
+            <div class="grid"><div class="card" onclick="saveChoice('carb', 'Quinoa', 'step-5')">Quinoa</div><div class="card" onclick="saveChoice('carb', 'Rice', 'step-5')">Rice</div><div class="card" onclick="saveChoice('carb', 'Sweet Potato', 'step-5')">Sweet Potato</div></div>
+        </div>
+
+        <div id="step-5" class="step">
+            <h1>Vegetables</h1>
+            <div class="grid"><div class="card" onclick="saveChoice('veg', 'Spinach', 'step-6')">Spinach</div><div class="card" onclick="saveChoice('veg', 'Broccoli', 'step-6')">Broccoli</div></div>
+        </div>
+
+        <div id="step-6" class="step">
+            <h1>Store</h1>
+            <div class="grid"><div class="card" onclick="saveChoice('store', 'Lidl', 'step-7')">Lidl</div><div class="card" onclick="saveChoice('store', 'Dunnes', 'step-7')">Dunnes</div><div class="card" onclick="saveChoice('store', 'Aldi', 'step-7')">Aldi</div></div>
+        </div>
+
+        <div id="step-7" class="step">
             <h1>Dinner Ready</h1>
-            <div id="recipe-display">
-                <h3 id="recipe-title"></h3>
-                <p id="recipe-desc" style="margin: 1rem 0;"></p>
-                <div class="nutrient-bar"><div class="nutrient-fill"></div></div>
-                <small>Optimized for 70kg Maintenance</small>
+            <div id="recipe-display" style="text-align: left;">
+                <p id="recipe-text" style="font-weight: bold; margin-bottom: 10px;"></p>
+                <table>
+                    <thead><tr><th>Nutrient</th><th>Amount</th><th>Source</th></tr></thead>
+                    <tbody id="nutrient-body"></tbody>
+                </table>
             </div>
-            <button onclick="location.reload()" style="margin-top:20px; padding: 1rem 2rem; background: var(--charcoal); color: white; border: none; font-weight: bold; cursor: pointer; width: 100%;">RESTART</button>
+            <button onclick="location.reload()" style="margin-top:20px; padding: 1rem 2rem; background: var(--charcoal); color: white; border: none; width: 100%; cursor: pointer;">RESTART</button>
         </div>
     </main>
 
-    <footer>
-        <p>&copy; 2026 What's for Dinner. All Rights Reserved.</p>
-    </footer>
+    <footer>&copy; 2026 What's for Dinner. All Rights Reserved.</footer>
 
     <script>
-        const state = { protein: '', carb: '', store: '' };
+        const state = { gender: '', weight: '', protein: '', carb: '', veg: '', store: '' };
 
         function saveChoice(key, value, nextId) {
             state[key] = value;
-            if(nextId === 'step-4') {
-                renderResult();
-            }
+            if(nextId === 'step-7') renderResult();
             nextStep(nextId);
         }
 
@@ -104,16 +99,20 @@
         }
 
         function renderResult() {
-            const recipes = {
-                "Salmon|Quinoa": "Lemon-Herb Crusted Salmon served over a fluffy Quinoa bed with sautéed spinach. Rich in Omega-3s.",
-                "Salmon|Sweet Potato": "Oven-baked Salmon Fillet paired with roasted Sweet Potato wedges and steamed broccoli.",
-                "Beef|Quinoa": "Pan-seared Beef strips with a Quinoa stir-fry, peppers, and onions. High iron and B12 content.",
-                "Beef|Sweet Potato": "Grilled Lean Steak with garlic-infused Sweet Potato mash and kale. Optimized for post-workout recovery."
-            };
+            const base = state.weight === '70kg+' ? 1.2 : 1.0;
+            const proteinG = Math.round(120 * base);
+            const carbG = Math.round(150 * base);
+            const fatG = Math.round(60 * base);
 
-            const key = `${state.protein}|${state.carb}`;
-            document.getElementById('recipe-title').innerText = `${state.protein} & ${state.carb} at ${state.store}`;
-            document.getElementById('recipe-desc').innerText = recipes[key] || "Custom fusion meal created for your nutritional needs.";
+            document.getElementById('recipe-text').innerText = `Dinner: ${state.protein} with ${state.carb} and ${state.veg} from ${state.store}.`;
+            
+            const tbody = document.getElementById('nutrient-body');
+            tbody.innerHTML = `
+                <tr><td>Protein</td><td>${proteinG}g</td><td>${state.protein}</td></tr>
+                <tr><td>Carbs</td><td>${carbG}g</td><td>${state.carb}</td></tr>
+                <tr><td>Fats</td><td>${fatG}g</td><td>Olive Oil & ${state.protein}</td></tr>
+                <tr><td>Fiber</td><td>25g</td><td>${state.veg}</td></tr>
+            `;
         }
     </script>
 </body>
