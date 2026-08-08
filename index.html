@@ -3,117 +3,948 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What's for Dinner</title>
+    <title>What's for Dinner - Minimal Planner & Storage Twin</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><path d=%22M2 16L10 24L30 8%22 stroke=%22%23FF8C00%22 stroke-width=%224%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 fill=%22none%22/></svg>">
     
     <style>
-        :root { --orange: #FF8C00; --white: #FFFFFF; --charcoal: #222222; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-        body { background-color: var(--white); color: var(--charcoal); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        header { padding: 2rem; position: absolute; top: 0; left: 0; width: 100%; z-index: 10; }
-        .logo { font-weight: 900; font-size: 1.5rem; letter-spacing: -1px; text-transform: uppercase; text-decoration: none; color: var(--charcoal); }
-
-        #app-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-        .step { display: none; opacity: 0; transition: opacity 0.6s ease-in-out; text-align: center; width: 100%; max-width: 500px; }
-        .step.active { display: block; opacity: 1; }
-
-        h1 { font-size: 2rem; text-transform: uppercase; margin-bottom: 2rem; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .card { border: 2px solid var(--charcoal); padding: 1.5rem; cursor: pointer; transition: 0.2s; font-weight: bold; }
-        .card:hover { border-color: var(--orange); background: var(--orange); color: var(--white); }
-
-        table { width: 100%; margin-top: 1rem; border-collapse: collapse; text-align: left; }
-        th, td { padding: 0.5rem; border-bottom: 1px solid #eee; }
+        :root { 
+            --orange: #FF8C00; 
+            --white: #FFFFFF; 
+            --charcoal: #222222; 
+            --light-gray: #FAFAFA;
+            --fridge-bg: #E8EEF5;
+            --pantry-wood: #8B5A2B;
+            --pantry-wood-light: #D2B48C;
+            --spice-wood: #5C3A21;
+            --glass-shelf: rgba(200, 220, 235, 0.5);
+            --led-glow: rgba(225, 245, 255, 0.95);
+            
+            --status-green: #2e7d32;
+            --status-green-bg: #e8f5e9;
+            --status-yellow: #f57f17;
+            --status-yellow-bg: #fffde7;
+            --status-red: #c62828;
+            --status-red-bg: #ffebee;
+        }
         
-        footer { padding: 1rem; text-align: center; font-size: 0.6rem; color: #aaa; border-top: 1px solid #eee; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+        body { background-color: var(--white); color: var(--charcoal); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        
+        header { padding: 1.5rem 2rem; width: 100%; z-index: 100; display: flex; justify-content: space-between; align-items: center; background: var(--white); border-bottom: 1px solid #f0f0f0; }
+        .logo { font-weight: 900; font-size: 1.5rem; letter-spacing: -1px; text-transform: uppercase; cursor: pointer; color: var(--charcoal); }
+        .nav-link { font-weight: 600; font-size: 0.9rem; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; padding-bottom: 2px; }
+        .nav-link:hover { border-color: var(--charcoal); }
+        
+        main { flex: 1; display: flex; padding: 2rem; justify-content: center; align-items: flex-start; }
+        .view-panel { width: 100%; display: flex; flex-direction: column; }
+        .hidden { display: none !important; }
+        
+        h1 { font-size: 2.2rem; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; line-height: 1; margin-bottom: 0.5rem; }
+        .subtitle { font-size: 0.85rem; font-weight: 500; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.5rem; }
+
+        .mode-toggle-bar { display: flex; gap: 0.5rem; justify-content: center; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; }
+        .mode-btn { padding: 0.6rem 1rem; border: 2px solid var(--charcoal); border-radius: 8px; background: var(--white); font-weight: 800; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; transition: all 0.15s ease; }
+        .mode-btn.active { background: var(--charcoal); color: var(--white); }
+        .mode-btn.bachelor-btn { background: var(--orange); color: var(--white); border-color: var(--orange); }
+
+        /* STORAGE WORKSPACE */
+        .storage-workspace { display: flex; gap: 1.5rem; justify-content: center; align-items: flex-start; width: 100%; max-width: 1250px; margin: 0 auto 2rem auto; flex-wrap: wrap; perspective: 1000px; }
+        .storage-chassis { flex: 1; min-width: 310px; max-width: 380px; height: 440px; border: 10px solid var(--charcoal); border-radius: 20px; display: flex; flex-direction: column; padding: 15px; gap: 10px; position: relative; overflow: hidden; background: #222; }
+        .chassis-title { font-size: 0.85rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; text-align: center; padding-bottom: 6px; border-bottom: 2px solid var(--charcoal); z-index: 2; color: var(--charcoal); background: rgba(255,255,255,0.85); border-radius: 6px; }
+
+        .fridge-chassis { background: var(--fridge-bg); border-color: #2b303a; }
+        .fridge-chassis.door-open { background: var(--led-glow); box-shadow: 0 0 35px rgba(180, 230, 255, 0.8), inset 0 0 25px rgba(255, 255, 255, 1); }
+        .pantry-chassis { background: var(--pantry-wood-light); border-color: var(--pantry-wood); }
+        .spice-chassis { background: #3d2314; border-color: var(--spice-wood); }
+
+        .compartment { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; position: relative; padding-bottom: 8px; z-index: 1; }
+        .glass-shelf-line { height: 8px; background: var(--glass-shelf); border-top: 1px solid rgba(255,255,255,0.9); border-bottom: 2px solid rgba(0,0,0,0.15); border-radius: 2px; width: 100%; }
+        .wood-shelf-line { height: 12px; background: var(--pantry-wood); border-bottom: 3px solid rgba(0,0,0,0.3); border-radius: 2px; width: 100%; }
+
+        .item-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: flex-end; margin-bottom: 6px; width: 100%; max-height: 125px; overflow-y: auto; }
+        
+        .food-pill { 
+            padding: 0.4rem 0.5rem; font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
+            border: 2px solid var(--charcoal); border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 3px; 
+            box-shadow: 0 3px 0 var(--charcoal); width: 105px; text-align: center; position: relative; cursor: pointer; transition: transform 0.15s ease;
+        }
+        .food-pill:hover { transform: translateY(-3px) scale(1.03); }
+        .food-pill.status-green { background: var(--status-green-bg); color: var(--status-green); border-color: var(--status-green); }
+        .food-pill.status-yellow { background: var(--status-yellow-bg); color: var(--status-yellow); border-color: var(--status-yellow); }
+        .food-pill.status-red { background: var(--status-red-bg); color: var(--status-red); border-color: var(--status-red); }
+
+        .spice-jar-container {
+            width: 38px; height: 50px; position: relative; border-radius: 6px 6px 4px 4px;
+            background: rgba(255,255,255,0.3); border: 2px solid rgba(255,255,255,0.8);
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2), 0 3px 6px rgba(0,0,0,0.3);
+            display: flex; flex-direction: column; justify-content: flex-end; align-items: center; overflow: hidden;
+            margin-bottom: 2px;
+        }
+        .spice-lid { position: absolute; top: 0; width: 100%; height: 10px; background: #C0C0C0; border-bottom: 1px solid #888; }
+        .spice-fill { width: 100%; height: 75%; border-radius: 0 0 2px 2px; }
+        .spice-label-strip {
+            position: absolute; top: 14px; width: 85%; height: 12px; background: #FFF8DC;
+            border: 1px solid #8B5A2B; font-size: 0.4rem; font-weight: 900; color: #3d2314;
+            display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden;
+        }
+
+        .food-pill img.product-img { width: 32px; height: 32px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(0,0,0,0.15); }
+        .food-pill .expiry-tag { font-size: 0.55rem; font-weight: 900; letter-spacing: -0.3px; }
+        
+        .remove-btn {
+            position: absolute; top: -6px; right: -6px; background: var(--charcoal); color: var(--white);
+            border: 1px solid var(--white); border-radius: 50%; width: 18px; height: 18px; font-size: 0.55rem;
+            display: flex; justify-content: center; align-items: center; cursor: pointer; font-weight: 900; z-index: 5;
+        }
+        .remove-btn:hover { background: var(--status-red); transform: scale(1.15); }
+
+        .empty-label { color: #888; font-style: italic; font-size: 0.8rem; margin-bottom: 15px; }
+
+        .door-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; display: flex; transform-origin: left center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
+        .door-panel.open { transform: rotateY(-110deg); }
+        .fridge-door { background: linear-gradient(135deg, #e6e6e6 0%, #cccccc 100%); border: 4px solid #aaa; display: flex; align-items: center; justify-content: flex-end; padding-right: 20px; }
+        .fridge-door .handle { width: 12px; height: 120px; background: #888; border-radius: 6px; }
+        .pantry-door { background: var(--pantry-wood); border: 4px solid #5c3a21; display: flex; align-items: center; justify-content: flex-end; padding-right: 20px; }
+        .pantry-door .handle { width: 10px; height: 80px; background: #d2b48c; border-radius: 4px; }
+        .spice-glass-door { width: 100%; height: 100%; background: rgba(255, 255, 255, 0.25); border: 6px solid var(--spice-wood); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: flex-end; padding-right: 15px; }
+        .spice-glass-door .handle { width: 8px; height: 60px; background: #e0e0e0; border-radius: 3px; }
+        .door-hint { position: absolute; bottom: 12px; right: 12px; font-size: 0.6rem; font-weight: 900; text-transform: uppercase; background: var(--orange); color: var(--white); padding: 3px 6px; border-radius: 4px; }
+
+        .controls-wrapper { max-width: 620px; margin: 0 auto; width: 100%; }
+        .input-matrix { display: grid; grid-template-columns: 2fr 1fr; gap: 0.5rem; margin-top: 0.5rem; }
+        .control-element { padding: 0.8rem; border: 2px solid var(--charcoal); font-weight: bold; font-size: 0.85rem; border-radius: 12px; outline: none; background: var(--white); }
+        button.action-trigger { background: var(--charcoal); color: var(--white); cursor: pointer; border-radius: 12px; border: 2px solid var(--charcoal); font-weight: 900; text-transform: uppercase; padding: 0.8rem; }
+        button.action-trigger.accent { background: var(--orange); border-color: var(--orange); }
+
+        /* UNBOXED MINIMAL STEP WIZARD STYLES */
+        .wizard-unboxed { max-width: 540px; margin: 0 auto; width: 100%; padding: 1rem 0; text-align: center; }
+        
+        .minimal-progress-bar { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin-bottom: 2.5rem; overflow: hidden; }
+        .minimal-progress-fill { height: 100%; background: var(--orange); width: 12.5%; transition: width 0.3s ease; }
+
+        .step-panel { display: flex; flex-direction: column; gap: 1.2rem; min-height: 240px; justify-content: center; align-items: center; }
+        .step-panel h2 { font-size: 1.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: -0.5px; }
+        
+        .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; width: 100%; margin-top: 0.5rem; }
+        .option-grid.single-col { grid-template-columns: 1fr; }
+
+        .select-card {
+            border: 3px solid var(--charcoal); border-radius: 14px; padding: 1.2rem 1rem;
+            font-size: 1.1rem; font-weight: 900; text-transform: uppercase; cursor: pointer;
+            background: var(--white); transition: all 0.15s ease; box-shadow: 4px 4px 0 var(--charcoal);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem;
+        }
+        .select-card:hover { background: var(--orange); color: var(--white); border-color: var(--orange); transform: translateY(-2px); }
+        .select-card .sub-text { font-size: 0.75rem; font-weight: 700; opacity: 0.8; text-transform: none; }
+
+        .step-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; width: 100%; }
+
+        /* CENTERED MEAL HERO & FINAL RESULTS OVERVIEW PANEL */
+        .results-container { max-width: 900px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 2rem; }
+        
+        .meal-hero-card {
+            width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: var(--white); border: 4px solid var(--charcoal); border-radius: 20px; padding: 2rem; box-shadow: 8px 8px 0 var(--charcoal);
+        }
+        .meal-hero-card h2 { font-size: 2.2rem; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; color: var(--orange); margin-bottom: 0.3rem; }
+        .meal-hero-card p { font-size: 0.95rem; font-weight: 700; color: #555; text-transform: uppercase; margin-bottom: 1.2rem; }
+        .meal-hero-img { width: 100%; max-width: 480px; height: 280px; object-fit: cover; border-radius: 14px; border: 3px solid var(--charcoal); box-shadow: 4px 4px 0 var(--charcoal); }
+
+        .breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; width: 100%; }
+        @media (max-width: 800px) { .breakdown-grid { grid-template-columns: 1fr; } }
+
+        .analysis-card { border: 3px solid var(--charcoal); padding: 1.5rem; background: var(--white); border-radius: 16px; box-shadow: 5px 5px 0 var(--charcoal); }
+        .analysis-card h3 { font-size: 1.1rem; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 0.5rem; }
+
+        .macro-comparison-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; font-weight: 800; }
+        .macro-comparison-table th { text-transform: uppercase; color: #666; font-size: 0.7rem; text-align: left; padding-bottom: 0.5rem; border-bottom: 2px solid var(--charcoal); }
+        .macro-comparison-table td { padding: 0.6rem 0; border-bottom: 1px dashed #e0e0e0; }
+        .delta-tag { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 900; }
+        .delta-tag.surplus { background: #ffebee; color: #c62828; }
+        .delta-tag.deficit { background: #e8f5e9; color: #2e7d32; }
+
+        .shop-breakdown-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 800; padding: 0.6rem 0; border-bottom: 1px dashed #ccc; }
+        .shop-badge { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background: var(--charcoal); color: var(--white); }
+        .quality-star { color: #FFB300; }
+
+        /* MODAL STYLES */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        .modal-card { background: var(--white); border: 4px solid var(--charcoal); border-radius: 16px; padding: 2rem; width: 90%; max-width: 480px; box-shadow: 8px 8px 0 var(--charcoal); position: relative; }
+        .modal-close { position: absolute; top: 12px; right: 12px; cursor: pointer; font-weight: 900; font-size: 1.2rem; background: var(--charcoal); color: var(--white); border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; }
+
+        .recipe-list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee; font-weight: 700; font-size: 0.85rem; }
+
+        footer { padding: 1rem; text-align: center; font-size: 0.65rem; color: #aaa; border-top: 1px solid #eee; background: var(--white); margin-top: auto; }
     </style>
 </head>
 <body>
 
-    <header><a href="javascript:location.reload()" class="logo">What's for Dinner</a></header>
+    <datalist id="suggested-spices">
+        <option value="Garlic Powder"><option value="Smoked Paprika"><option value="Black Pepper">
+        <option value="Oregano"><option value="Cumin"><option value="Turmeric">
+        <option value="Chicken Breast"><option value="Salmon Fillet"><option value="Mince">
+        <option value="Spaghetti"><option value="Basmati Rice"><option value="Broccoli"><option value="Carrot">
+    </datalist>
+
+    <header>
+        <div class="logo" onclick="navigateTo('fridge')">What's for Dinner</div>
+        <div class="nav-link" id="view-toggle-btn" onclick="toggleView()">Switch to Planner</div>
+    </header>
 
     <main id="app-container">
-        <div id="step-1" class="step active">
-            <h1>Select Gender</h1>
-            <div class="grid"><div class="card" onclick="saveChoice('gender', 'Male', 'step-2')">Male</div><div class="card" onclick="saveChoice('gender', 'Female', 'step-2')">Female</div></div>
-        </div>
-
-        <div id="step-2" class="step">
-            <h1>Weight Category</h1>
-            <div class="grid"><div class="card" onclick="saveChoice('weight', '50-70kg', 'step-3')">50-70kg</div><div class="card" onclick="saveChoice('weight', '70kg+', 'step-4')">70kg+</div></div>
-        </div>
-
-        <div id="step-3" class="step">
-            <h1>Protein</h1>
-            <div class="grid"><div class="card" onclick="saveChoice('protein', 'Salmon', 'step-4')">Salmon</div><div class="card" onclick="saveChoice('protein', 'Chicken', 'step-4')">Chicken</div><div class="card" onclick="saveChoice('protein', 'Beef', 'step-4')">Beef</div></div>
-        </div>
-
-        <div id="step-4" class="step">
-            <h1>Carbohydrate</h1>
-            <div class="grid"><div class="card" onclick="saveChoice('carb', 'Quinoa', 'step-5')">Quinoa</div><div class="card" onclick="saveChoice('carb', 'Rice', 'step-5')">Rice</div><div class="card" onclick="saveChoice('carb', 'Sweet Potato', 'step-5')">Sweet Potato</div></div>
-        </div>
-
-        <div id="step-5" class="step">
-            <h1>Vegetables</h1>
-            <div class="grid"><div class="card" onclick="saveChoice('veg', 'Spinach', 'step-6')">Spinach</div><div class="card" onclick="saveChoice('veg', 'Broccoli', 'step-6')">Broccoli</div></div>
-        </div>
-
-        <div id="step-6" class="step">
-            <h1>Store</h1>
-            <div class="grid"><div class="card" onclick="saveChoice('store', 'Lidl', 'step-7')">Lidl</div><div class="card" onclick="saveChoice('store', 'Dunnes', 'step-7')">Dunnes</div><div class="card" onclick="saveChoice('store', 'Aldi', 'step-7')">Aldi</div></div>
-        </div>
-
-        <div id="step-7" class="step">
-            <h1>Dinner Ready</h1>
-            <div id="recipe-display" style="text-align: left;">
-                <p id="recipe-text" style="font-weight: bold; margin-bottom: 10px;"></p>
-                <table>
-                    <thead><tr><th>Nutrient</th><th>Amount</th><th>Source</th></tr></thead>
-                    <tbody id="nutrient-body"></tbody>
-                </table>
+        
+        <!-- MODULE A: STORAGE WORKSPACE -->
+        <div id="fridge-view-panel" class="view-panel">
+            <div style="text-align: center;">
+                <h1>Digital Twin Workspace</h1>
+                <div class="subtitle">Interactive Storage Chassis & Dynamic Expiry Monitoring</div>
             </div>
-            <button onclick="location.reload()" style="margin-top:20px; padding: 1rem 2rem; background: var(--charcoal); color: white; border: none; width: 100%; cursor: pointer;">RESTART</button>
+
+            <div class="mode-toggle-bar">
+                <button class="mode-btn bachelor-btn" onclick="setBachelorMode()">🎓 Bachelor Mode</button>
+                <button class="mode-btn active" id="btn-toggle-pantry" onclick="toggleZone('pantry')">+ Pantry Cabinet</button>
+                <button class="mode-btn active" id="btn-toggle-spice" onclick="toggleZone('spice')">+ Glass Spice Rack</button>
+            </div>
+            
+            <div class="storage-workspace">
+                <div class="storage-chassis fridge-chassis" id="fridge-unit">
+                    <div class="door-panel fridge-door" onclick="toggleDoor('fridge-unit', 'fridge')">
+                        <div class="handle"></div>
+                        <span class="door-hint">Click Door</span>
+                    </div>
+                    <div class="chassis-title">Refrigerated Chassis (LED Light)</div>
+                    <div class="compartment">
+                        <div class="item-row" id="shelf-fridge-top"></div>
+                        <div class="glass-shelf-line"></div>
+                    </div>
+                    <div class="compartment">
+                        <div class="item-row" id="shelf-fridge-bottom"></div>
+                        <div class="glass-shelf-line"></div>
+                    </div>
+                </div>
+
+                <div class="storage-chassis pantry-chassis" id="pantry-unit">
+                    <div class="door-panel pantry-door" onclick="toggleDoor('pantry-unit', 'pantry')">
+                        <div class="handle"></div>
+                        <span class="door-hint">Click Door</span>
+                    </div>
+                    <div class="chassis-title">Wooden Pantry Cabinet</div>
+                    <div class="compartment">
+                        <div class="item-row" id="shelf-pantry-top"></div>
+                        <div class="wood-shelf-line"></div>
+                    </div>
+                    <div class="compartment">
+                        <div class="item-row" id="shelf-pantry-bottom"></div>
+                        <div class="wood-shelf-line"></div>
+                    </div>
+                </div>
+
+                <div class="storage-chassis spice-chassis" id="spice-unit">
+                    <div class="door-panel spice-glass-door" onclick="toggleDoor('spice-unit', 'spice')">
+                        <div class="handle"></div>
+                        <span class="door-hint">Glass Door</span>
+                    </div>
+                    <div class="chassis-title" style="color: #fff; background: rgba(0,0,0,0.6);">Glass Spice Cabinet</div>
+                    <div class="compartment">
+                        <div class="item-row" id="shelf-spice-top"></div>
+                        <div class="wood-shelf-line"></div>
+                    </div>
+                    <div class="compartment">
+                        <div class="item-row" id="shelf-spice-bottom"></div>
+                        <div class="wood-shelf-line"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-wrapper">
+                <div class="input-matrix">
+                    <input type="text" id="item-input" list="suggested-spices" class="control-element" placeholder="Item Name (e.g. Mince, Broccoli)" />
+                    <select id="zone-select" class="control-element">
+                        <option value="fridge">Fridge Target</option>
+                        <option value="pantry" id="opt-pantry">Pantry Target</option>
+                        <option value="spice" id="opt-spice">Spice Target</option>
+                    </select>
+                </div>
+                <div class="input-matrix" style="grid-template-columns: 1.2fr 1.2fr 1fr 1fr; margin-top: 0.5rem; margin-bottom: 1rem;">
+                    <input type="date" id="expiry-input" class="control-element" title="Best Before Date" />
+                    <input type="url" id="image-input" class="control-element" placeholder="Image URL" />
+                    <select id="shelf-select" class="control-element">
+                        <option value="top">Top Shelf</option>
+                        <option value="bottom">Bottom Shelf</option>
+                    </select>
+                    <button class="action-trigger accent" onclick="addItem()">Commit Item</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODULE B: UNBOXED MINIMAL STEP-BY-STEP PLANNER -->
+        <div id="planner-view-panel" class="view-panel hidden">
+            <div style="text-align: center;">
+                <h1>Nutrition & Meal Builder</h1>
+                <div class="subtitle">Interactive Guided Selection</div>
+            </div>
+
+            <!-- MINIMAL PROGRESS BAR & UNBOXED STEPS CONTAINER -->
+            <div id="wizard-unboxed-container" class="wizard-unboxed">
+                <div class="minimal-progress-bar">
+                    <div class="minimal-progress-fill" id="progress-fill"></div>
+                </div>
+
+                <!-- STEP 1: GENDER -->
+                <div class="step-panel" id="step-1">
+                    <h2>Select Gender</h2>
+                    <div class="option-grid">
+                        <div class="select-card" onclick="selectOption('gender', 'male')">♂ Male</div>
+                        <div class="select-card" onclick="selectOption('gender', 'female')">♀ Female</div>
+                    </div>
+                </div>
+
+                <!-- STEP 2: WEIGHT RANGE -->
+                <div class="step-panel hidden" id="step-2">
+                    <h2>Select Body Weight</h2>
+                    <div class="option-grid single-col">
+                        <div class="select-card" onclick="selectOption('weight', '60')">50 kg – 70 kg</div>
+                        <div class="select-card" onclick="selectOption('weight', '80')">70 kg – 90 kg</div>
+                        <div class="select-card" onclick="selectOption('weight', '100')">90 kg +</div>
+                    </div>
+                </div>
+
+                <!-- STEP 3: ACTIVITY LEVEL -->
+                <div class="step-panel hidden" id="step-3">
+                    <h2>Select Activity Level</h2>
+                    <div class="option-grid single-col">
+                        <div class="select-card" onclick="selectOption('activity', '1.2')">
+                            Sedentary
+                            <span class="sub-text">Little to no workouts</span>
+                        </div>
+                        <div class="select-card" onclick="selectOption('activity', '1.375')">
+                            Moderate
+                            <span class="sub-text">3–4 workouts per week</span>
+                        </div>
+                        <div class="select-card" onclick="selectOption('activity', '1.55')">
+                            Active
+                            <span class="sub-text">5+ intense workouts per week</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 4: GOAL -->
+                <div class="step-panel hidden" id="step-4">
+                    <h2>Select Fitness Goal</h2>
+                    <div class="option-grid single-col">
+                        <div class="select-card" onclick="selectOption('goal', 'cut')">Fat Loss</div>
+                        <div class="select-card" onclick="selectOption('goal', 'maintain')">Maintenance</div>
+                        <div class="select-card" onclick="selectOption('goal', 'build')">Muscle Gain</div>
+                    </div>
+                </div>
+
+                <!-- STEP 5: PROTEIN SELECTION (STRICTLY PROTEINS) -->
+                <div class="step-panel hidden" id="step-5">
+                    <h2>Select Protein Source</h2>
+                    <p style="font-size: 0.8rem; color: #666;">Categorized inventory items</p>
+                    <div class="option-grid single-col" id="protein-options-container"></div>
+                </div>
+
+                <!-- STEP 6: CARB SELECTION -->
+                <div class="step-panel hidden" id="step-6">
+                    <h2>Select Carbohydrate</h2>
+                    <p style="font-size: 0.8rem; color: #666;">Categorized inventory items</p>
+                    <div class="option-grid single-col" id="carb-options-container"></div>
+                </div>
+
+                <!-- STEP 7: VEGETABLE SELECTION -->
+                <div class="step-panel hidden" id="step-7">
+                    <h2>Select Vegetable</h2>
+                    <p style="font-size: 0.8rem; color: #666;">Fresh produce from inventory</p>
+                    <div class="option-grid single-col" id="veg-options-container"></div>
+                </div>
+
+                <!-- STEP 8: SPICE / SEASONING SELECTION -->
+                <div class="step-panel hidden" id="step-8">
+                    <h2>Select Spice / Seasoning</h2>
+                    <p style="font-size: 0.8rem; color: #666;">Glass cabinet seasonings</p>
+                    <div class="option-grid single-col" id="spice-options-container"></div>
+                    
+                    <button class="action-trigger" style="margin-top: 1rem; width: 100%; background: #555; border-color: #555;" onclick="openRecipeManager()">+ Manage Custom Recipes</button>
+                </div>
+
+                <!-- WIZARD NAVIGATION BACK BUTTON -->
+                <div class="step-nav">
+                    <button class="action-trigger" id="wizard-back-btn" onclick="prevStep()" style="visibility: hidden;">← Back</button>
+                </div>
+            </div>
+
+            <!-- FINAL RESULTS OVERVIEW PANEL -->
+            <div id="results-panel" class="hidden">
+                <div class="results-container">
+                    
+                    <!-- CENTERED HERO MEAL DISPLAY -->
+                    <div class="meal-hero-card">
+                        <h2 id="res-meal-title">Spaghetti Bolognese</h2>
+                        <p id="res-meal-ingredients-list">Mince • Spaghetti • Garlic • Paprika</p>
+                        <img id="res-meal-image" class="meal-hero-img" src="image_agent_tag_12883518791977636373" alt="Prepared Dish" />
+                    </div>
+
+                    <!-- BREAKDOWN GRID BELOW -->
+                    <div class="breakdown-grid">
+                        
+                        <!-- MACRO BREAKDOWN & TARGET COMPARISON -->
+                        <div class="analysis-card">
+                            <h3>Nutritional Targets vs. Meal</h3>
+                            <table class="macro-comparison-table">
+                                <thead>
+                                    <tr>
+                                        <th>Metric</th>
+                                        <th>Target</th>
+                                        <th>Meal</th>
+                                        <th>Variance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Protein</td>
+                                        <td id="target-val-p">0g</td>
+                                        <td id="meal-val-p">0g</td>
+                                        <td id="delta-val-p"><span class="delta-tag deficit">0g</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Carbs</td>
+                                        <td id="target-val-c">0g</td>
+                                        <td id="meal-val-c">0g</td>
+                                        <td id="delta-val-c"><span class="delta-tag deficit">0g</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Fats</td>
+                                        <td id="target-val-f">0g</td>
+                                        <td id="meal-val-f">0g</td>
+                                        <td id="delta-val-f"><span class="delta-tag deficit">0g</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Energy</td>
+                                        <td id="target-val-k">0 kcal</td>
+                                        <td id="meal-val-k">0 kcal</td>
+                                        <td id="delta-val-k"><span class="delta-tag deficit">0 kcal</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- CHEAPEST STORE & QUALITY BREAKDOWN PER ITEM -->
+                        <div class="analysis-card">
+                            <h3>Supermarket Price & Quality Match</h3>
+                            <div id="item-pricing-breakdown-list"></div>
+
+                            <div style="margin-top: 1.2rem; padding-top: 0.8rem; border-top: 2px solid var(--charcoal); display: flex; justify-content: space-between; align-items: center; font-weight: 900;">
+                                <span>Cheapest Basket: <span id="cheapest-store-name" style="color: var(--orange);">LIDL</span></span>
+                                <span id="cheapest-store-total" style="font-size: 1.2rem;">€0.00</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <button class="action-trigger" style="margin-top: 1rem; padding: 1rem 2rem;" onclick="resetWizard()">↺ Reconfigure Meal Plan</button>
+                </div>
+            </div>
         </div>
     </main>
 
-    <footer>&copy; 2026 What's for Dinner. All Rights Reserved.</footer>
+    <!-- ITEM INSPECTOR POPUP MODAL -->
+    <div id="inspector-modal" class="modal-overlay hidden" onclick="closeModal('inspector-modal')">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-close" onclick="closeModal('inspector-modal')">✖</div>
+            <h2 id="modal-title" style="text-transform: uppercase; font-weight: 900; margin-bottom: 0.5rem;">Item Details</h2>
+            <div id="modal-content" style="font-size: 0.9rem; font-weight: 700; color: #444; line-height: 1.6; margin-top: 1rem;"></div>
+        </div>
+    </div>
+
+    <!-- CUSTOM RECIPE MANAGER MODAL -->
+    <div id="recipe-modal" class="modal-overlay hidden" onclick="closeModal('recipe-modal')">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-close" onclick="closeModal('recipe-modal')">✖</div>
+            <h2 style="text-transform: uppercase; font-weight: 900; margin-bottom: 0.5rem;">Custom Recipe Upload</h2>
+            
+            <div style="display:flex; flex-direction:column; gap:0.6rem; margin-top:1rem;">
+                <input type="text" id="custom-recipe-title" class="control-element" placeholder="Recipe Name (e.g. Spaghetti Bolognese)" />
+                <input type="text" id="custom-recipe-ing1" class="control-element" placeholder="Ingredient 1 Keyword (e.g. mince)" />
+                <input type="text" id="custom-recipe-ing2" class="control-element" placeholder="Ingredient 2 Keyword (e.g. spaghetti)" />
+                <button class="action-trigger accent" onclick="saveCustomRecipe()">Save Custom Recipe</button>
+            </div>
+
+            <div style="margin-top: 1.5rem; text-align: left;">
+                <h4 style="font-weight: 900; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 0.5rem;">Saved Custom Recipes</h4>
+                <div id="saved-recipes-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>&copy; 2026 What's for Dinner. All rights reserved to all code we write.</footer>
 
     <script>
-        const state = { gender: '', weight: '', protein: '', carb: '', veg: '', store: '' };
-
-        function saveChoice(key, value, nextId) {
-            state[key] = value;
-            if(nextId === 'step-7') renderResult();
-            nextStep(nextId);
-        }
-
-        function nextStep(nextId) {
-            const current = document.querySelector('.step.active');
-            current.classList.remove('active');
-            setTimeout(() => {
-                current.style.display = 'none';
-                const next = document.getElementById(nextId);
-                next.style.display = 'block';
-                setTimeout(() => next.classList.add('active'), 50);
-            }, 600);
-        }
-
-        function renderResult() {
-            const base = state.weight === '70kg+' ? 1.2 : 1.0;
-            const proteinG = Math.round(120 * base);
-            const carbG = Math.round(150 * base);
-            const fatG = Math.round(60 * base);
-
-            document.getElementById('recipe-text').innerText = `Dinner: ${state.protein} with ${state.carb} and ${state.veg} from ${state.store}.`;
+        const appState = {
+            currentView: 'fridge',
+            wizardStep: 1,
+            userSelections: {
+                gender: 'male',
+                weight: 80,
+                activity: 1.375,
+                goal: 'maintain',
+                protein: 'chicken breast',
+                carb: 'basmati rice',
+                veg: 'broccoli',
+                spice: 'garlic powder'
+            },
+            activeZones: { pantry: true, spice: true },
+            doors: { fridge: false, pantry: false, spice: false },
             
-            const tbody = document.getElementById('nutrient-body');
-            tbody.innerHTML = `
-                <tr><td>Protein</td><td>${proteinG}g</td><td>${state.protein}</td></tr>
-                <tr><td>Carbs</td><td>${carbG}g</td><td>${state.carb}</td></tr>
-                <tr><td>Fats</td><td>${fatG}g</td><td>Olive Oil & ${state.protein}</td></tr>
-                <tr><td>Fiber</td><td>25g</td><td>${state.veg}</td></tr>
-            `;
+            // STRICT INVENTORY CATEGORIZATION DATABASE
+            categories: {
+                proteins: ["chicken breast", "chicken", "mince", "salmon", "salmon fillet", "beef", "steak"],
+                carbs: ["spaghetti", "basmati rice", "rice", "sweet potato", "pasta", "noodle"],
+                veggies: ["broccoli", "carrot", "spinach", "cucumber", "tomato", "bell pepper"],
+                spices: ["turmeric", "oregano", "paprika", "chili powder", "black pepper", "garlic powder", "cumin"]
+            },
+
+            inventory: {
+                fridge: { 
+                    top: [
+                        { id: "f_top_1", name: "chicken breast", displayName: "Chicken Breast", expiry: "2026-07-28", img: "https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=100&auto=format&fit=crop&q=60" },
+                        { id: "f_top_2", name: "salmon fillet", displayName: "Salmon Fillet", expiry: "2026-07-29", img: "" }
+                    ], 
+                    bottom: [
+                        { id: "f_bot_1", name: "mince", displayName: "Mince", expiry: "2026-07-26", img: "" },
+                        { id: "f_bot_2", name: "broccoli", displayName: "Broccoli", expiry: "2026-07-30", img: "" }
+                    ] 
+                },
+                pantry: { 
+                    top: [{ id: "p_top_1", name: "spaghetti", displayName: "Spaghetti", expiry: "2027-01-01", img: "" }], 
+                    bottom: [{ id: "p_bot_1", name: "basmati rice", displayName: "Basmati Rice", expiry: "2026-08-10", img: "" }] 
+                },
+                spice: { 
+                    top: [
+                        { id: "s_top_1", name: "turmeric", displayName: "Turmeric", expiry: "2027-06-15", img: "" },
+                        { id: "s_top_2", name: "oregano", displayName: "Oregano", expiry: "2026-07-25", img: "" }
+                    ], 
+                    bottom: [
+                        { id: "s_bot_1", name: "garlic powder", displayName: "Garlic Powder", expiry: "2027-12-31", img: "" }
+                    ] 
+                }
+            },
+            spiceColors: {
+                "turmeric": "#FFB300",
+                "oregano": "#2E7D32",
+                "paprika": "#D32F2F",
+                "chili powder": "#C62828",
+                "black pepper": "#37474F",
+                "garlic powder": "#F5F5DC",
+                "cumin": "#8D6E63"
+            },
+            recipes: [
+                { title: "Spaghetti Bolognese", keywords: ["mince", "spaghetti"], img: "image_agent_tag_12883518791977636373" },
+                { title: "Healthy Chicken Rice Bowl", keywords: ["chicken", "rice"], img: "image_agent_tag_12883518791977631288" },
+                { title: "Caramelized Beef Rice Bowl", keywords: ["mince", "rice"], img: "image_agent_tag_12883518791977638848" }
+            ],
+            nutritionDb: {
+                "chicken breast": { p: 31, c: 0, f: 3.6, kcal: 165, store: "Lidl", price: 2.20, quality: "★★★★☆" },
+                "salmon fillet": { p: 25, c: 0, f: 12, kcal: 206, store: "Aldi", price: 3.10, quality: "★★★★★" },
+                "mince": { p: 24, c: 0, f: 15, kcal: 231, store: "Lidl", price: 2.50, quality: "★★★★☆" },
+                "spaghetti": { p: 5, c: 31, f: 0.9, kcal: 158, store: "Aldi", price: 0.45, quality: "★★★☆☆" },
+                "basmati rice": { p: 3.5, c: 28, f: 0.4, kcal: 130, store: "Lidl", price: 0.40, quality: "★★★★☆" },
+                "broccoli": { p: 2.8, c: 7, f: 0.4, kcal: 34, store: "Tesco", price: 0.89, quality: "★★★★★" },
+                "garlic powder": { p: 0.2, c: 1, f: 0, kcal: 5, store: "Lidl", price: 0.65, quality: "★★★★☆" },
+                "turmeric": { p: 0.1, c: 0.8, f: 0.1, kcal: 4, store: "Dunnes", price: 0.95, quality: "★★★★★" }
+            }
+        };
+
+        function getSpiceColor(name) {
+            const lower = name.toLowerCase();
+            for (let key in appState.spiceColors) {
+                if (lower.includes(key)) return appState.spiceColors[key];
+            }
+            return "#D2691E";
         }
+
+        function getExpiryStatus(expiryDateStr) {
+            if (!expiryDateStr) return { class: 'status-green', label: 'Fresh' };
+            const today = new Date(); today.setHours(0,0,0,0);
+            const expDate = new Date(expiryDateStr); expDate.setHours(0,0,0,0);
+            const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) return { class: 'status-red', label: `Expired (${Math.abs(diffDays)}d ago)` };
+            if (diffDays <= 3) return { class: 'status-yellow', label: diffDays === 0 ? 'Expires Today' : `Expires in ${diffDays}d` };
+            return { class: 'status-green', label: `Good (${diffDays}d left)` };
+        }
+
+        /* MINIMAL STEP ENGINE WITH CATEGORY FILTERING */
+        function selectOption(key, val) {
+            appState.userSelections[key] = val;
+            nextStep();
+        }
+
+        function nextStep() {
+            document.getElementById(`step-${appState.wizardStep}`).classList.add('hidden');
+            appState.wizardStep++;
+
+            if (appState.wizardStep > 8) {
+                document.getElementById('wizard-unboxed-container').classList.add('hidden');
+                document.getElementById('results-panel').classList.remove('hidden');
+                calculateFinalResults();
+                return;
+            }
+
+            if (appState.wizardStep === 5) renderCategoryOptions('proteins', 'protein', 'protein-options-container');
+            if (appState.wizardStep === 6) renderCategoryOptions('carbs', 'carb', 'carb-options-container');
+            if (appState.wizardStep === 7) renderCategoryOptions('veggies', 'veg', 'veg-options-container');
+            if (appState.wizardStep === 8) renderCategoryOptions('spices', 'spice', 'spice-options-container');
+
+            document.getElementById(`step-${appState.wizardStep}`).classList.remove('hidden');
+            document.getElementById('progress-fill').style.width = `${(appState.wizardStep / 8) * 100}%`;
+            document.getElementById('wizard-back-btn').style.visibility = appState.wizardStep > 1 ? 'visible' : 'hidden';
+        }
+
+        function prevStep() {
+            if (appState.wizardStep <= 1) return;
+            document.getElementById(`step-${appState.wizardStep}`).classList.add('hidden');
+            appState.wizardStep--;
+            document.getElementById(`step-${appState.wizardStep}`).classList.remove('hidden');
+            document.getElementById('progress-fill').style.width = `${(appState.wizardStep / 8) * 100}%`;
+            document.getElementById('wizard-back-btn').style.visibility = appState.wizardStep > 1 ? 'visible' : 'hidden';
+        }
+
+        function resetWizard() {
+            appState.wizardStep = 1;
+            document.getElementById('results-panel').classList.add('hidden');
+            document.getElementById('wizard-unboxed-container').classList.remove('hidden');
+            
+            for (let i = 1; i <= 8; i++) {
+                document.getElementById(`step-${i}`).classList.add('hidden');
+            }
+            document.getElementById('step-1').classList.remove('hidden');
+            document.getElementById('progress-fill').style.width = '12.5%';
+            document.getElementById('wizard-back-btn').style.visibility = 'hidden';
+        }
+
+        function renderCategoryOptions(categoryKey, selectionKey, containerId) {
+            const container = document.getElementById(containerId);
+            const validKeywords = appState.categories[categoryKey];
+            let matchingItems = [];
+
+            Object.keys(appState.inventory).forEach(z => {
+                Object.keys(appState.inventory[z]).forEach(s => {
+                    appState.inventory[z][s].forEach(item => {
+                        const nameLower = item.name.toLowerCase();
+                        if (validKeywords.some(kw => nameLower.includes(kw))) {
+                            if (!matchingItems.some(i => i.name === item.name)) {
+                                matchingItems.push(item);
+                            }
+                        }
+                    });
+                });
+            });
+
+            if (matchingItems.length === 0) {
+                // Fallback default options if inventory lacks category items
+                if (categoryKey === 'proteins') {
+                    matchingItems = [
+                        { name: "chicken breast", displayName: "Chicken Breast" },
+                        { name: "mince", displayName: "Mince" },
+                        { name: "salmon fillet", displayName: "Salmon Fillet" }
+                    ];
+                } else if (categoryKey === 'veggies') {
+                    matchingItems = [
+                        { name: "broccoli", displayName: "Broccoli" },
+                        { name: "carrot", displayName: "Carrot" }
+                    ];
+                } else if (categoryKey === 'spices') {
+                    matchingItems = [
+                        { name: "garlic powder", displayName: "Garlic Powder" },
+                        { name: "turmeric", displayName: "Turmeric" }
+                    ];
+                }
+            }
+
+            container.innerHTML = matchingItems.map(i => `
+                <div class="select-card" onclick="selectOption('${selectionKey}', '${i.name}')">
+                    ${i.displayName}
+                </div>
+            `).join('');
+        }
+
+        function calculateFinalResults() {
+            const weight = parseFloat(appState.userSelections.weight) || 75;
+            const sex = appState.userSelections.gender;
+            const activity = parseFloat(appState.userSelections.activity);
+            const goal = appState.userSelections.goal;
+
+            let bmr = (10 * weight) + (6.25 * 175) - (5 * 25) + (sex === 'male' ? 5 : -161);
+            let tdee = bmr * activity;
+            if (goal === 'build') tdee += 300;
+            if (goal === 'cut') tdee -= 400;
+
+            const targetP = Math.round(weight * 2.0);
+            const targetF = Math.round((tdee * 0.25) / 9);
+            const targetC = Math.round((tdee - (targetP * 4) - (targetF * 9)) / 4);
+
+            document.getElementById('target-val-p').innerText = `${targetP}g`;
+            document.getElementById('target-val-c').innerText = `${targetC}g`;
+            document.getElementById('target-val-f').innerText = `${targetF}g`;
+            document.getElementById('target-val-k').innerText = `${Math.round(tdee)} kcal`;
+
+            const pKey = appState.userSelections.protein;
+            const cKey = appState.userSelections.carb;
+            const vKey = appState.userSelections.veg;
+            const sKey = appState.userSelections.spice;
+
+            const selectedItems = [pKey, cKey, vKey, sKey];
+
+            let mealP = 0, mealC = 0, mealF = 0, mealK = 0, totalPrice = 0;
+            let breakdownHtml = "";
+
+            selectedItems.forEach(itemKey => {
+                const itemData = appState.nutritionDb[itemKey] || { p: 15, c: 15, f: 3, kcal: 140, store: "Lidl", price: 1.50, quality: "★★★★☆" };
+                mealP += itemData.p; mealC += itemData.c; mealF += itemData.f; mealK += itemData.kcal;
+                totalPrice += itemData.price;
+
+                breakdownHtml += `
+                    <div class="shop-breakdown-row">
+                        <span>${capitalize(itemKey)}</span>
+                        <div>
+                            <span class="shop-badge">${itemData.store}</span>
+                            <span style="margin: 0 8px;">€${itemData.price.toFixed(2)}</span>
+                            <span class="quality-star">${itemData.quality}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            document.getElementById('meal-val-p').innerText = `${Math.round(mealP)}g`;
+            document.getElementById('meal-val-c').innerText = `${Math.round(mealC)}g`;
+            document.getElementById('meal-val-f').innerText = `${Math.round(mealF)}g`;
+            document.getElementById('meal-val-k').innerText = `${Math.round(mealK)} kcal`;
+
+            // Render Macro Deltas
+            document.getElementById('delta-val-p').innerHTML = getDeltaTag(mealP - targetP, 'g');
+            document.getElementById('delta-val-c').innerHTML = getDeltaTag(mealC - targetC, 'g');
+            document.getElementById('delta-val-f').innerHTML = getDeltaTag(mealF - targetF, 'g');
+            document.getElementById('delta-val-k').innerHTML = getDeltaTag(mealK - tdee, ' kcal');
+
+            // Render Meal Hero Details
+            let mealTitle = "";
+            let mealImg = "image_agent_tag_12883518791977631288";
+
+            const matchedRecipe = appState.recipes.find(r => 
+                (pKey.includes(r.keywords[0]) && cKey.includes(r.keywords[1])) ||
+                (cKey.includes(r.keywords[0]) && pKey.includes(r.keywords[1]))
+            );
+
+            if (matchedRecipe) {
+                mealTitle = matchedRecipe.title;
+                if (matchedRecipe.img) mealImg = matchedRecipe.img;
+            } else {
+                mealTitle = `${capitalize(pKey)} & ${capitalize(cKey)} Bowl`;
+            }
+
+            document.getElementById('res-meal-title').innerText = mealTitle;
+            document.getElementById('res-meal-ingredients-list').innerText = `${capitalize(pKey)} • ${capitalize(cKey)} • ${capitalize(vKey)} • ${capitalize(sKey)}`;
+            document.getElementById('res-meal-image').src = mealImg;
+
+            document.getElementById('item-pricing-breakdown-list').innerHTML = breakdownHtml;
+            document.getElementById('cheapest-store-total').innerText = `€${totalPrice.toFixed(2)}`;
+        }
+
+        function getDeltaTag(diff, unit) {
+            const rounded = Math.round(diff);
+            if (rounded >= 0) return `<span class="delta-tag surplus">+${rounded}${unit}</span>`;
+            return `<span class="delta-tag deficit">${rounded}${unit}</span>`;
+        }
+
+        function capitalize(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        /* RECIPE MANAGER MODAL FUNCTIONS */
+        function openRecipeManager() {
+            renderSavedRecipes();
+            document.getElementById('recipe-modal').classList.remove('hidden');
+        }
+
+        function saveCustomRecipe() {
+            const title = document.getElementById('custom-recipe-title').value.trim();
+            const ing1 = document.getElementById('custom-recipe-ing1').value.trim().toLowerCase();
+            const ing2 = document.getElementById('custom-recipe-ing2').value.trim().toLowerCase();
+
+            if (!title || !ing1 || !ing2) return;
+
+            appState.recipes.push({ title: title, keywords: [ing1, ing2], img: "image_agent_tag_12883518791977631288" });
+            document.getElementById('custom-recipe-title').value = '';
+            document.getElementById('custom-recipe-ing1').value = '';
+            document.getElementById('custom-recipe-ing2').value = '';
+
+            renderSavedRecipes();
+        }
+
+        function renderSavedRecipes() {
+            const container = document.getElementById('saved-recipes-list');
+            container.innerHTML = appState.recipes.map((r, idx) => `
+                <div class="recipe-list-item">
+                    <span>${r.title} (${r.keywords.join(' + ')})</span>
+                    <button class="remove-btn" style="position:static;" onclick="deleteRecipe(${idx})">✖</button>
+                </div>
+            `).join('');
+        }
+
+        function deleteRecipe(idx) {
+            appState.recipes.splice(idx, 1);
+            renderSavedRecipes();
+        }
+
+        function toggleDoor(unitId, key) {
+            appState.doors[key] = !appState.doors[key];
+            const unit = document.getElementById(unitId);
+            const door = unit.querySelector('.door-panel');
+
+            if (appState.doors[key]) {
+                door.classList.add('open');
+                if (key === 'fridge') unit.classList.add('door-open');
+            } else {
+                door.classList.remove('open');
+                if (key === 'fridge') unit.classList.remove('door-open');
+            }
+        }
+
+        function setBachelorMode() {
+            appState.activeZones.pantry = false;
+            appState.activeZones.spice = false;
+            document.getElementById('pantry-unit').classList.add('hidden');
+            document.getElementById('spice-unit').classList.add('hidden');
+            document.getElementById('btn-toggle-pantry').classList.remove('active');
+            document.getElementById('btn-toggle-spice').classList.remove('active');
+            document.getElementById('opt-pantry').style.display = 'none';
+            document.getElementById('opt-spice').style.display = 'none';
+            document.getElementById('zone-select').value = 'fridge';
+        }
+
+        function toggleZone(zoneKey) {
+            appState.activeZones[zoneKey] = !appState.activeZones[zoneKey];
+            const unitElem = document.getElementById(`${zoneKey}-unit`);
+            const btnElem = document.getElementById(`btn-toggle-${zoneKey}`);
+            const optElem = document.getElementById(`opt-${zoneKey}`);
+
+            if (appState.activeZones[zoneKey]) {
+                unitElem.classList.remove('hidden');
+                btnElem.classList.add('active');
+                optElem.style.display = 'block';
+            } else {
+                unitElem.classList.add('hidden');
+                btnElem.classList.remove('active');
+                optElem.style.display = 'none';
+            }
+        }
+
+        function addItem() {
+            const input = document.getElementById('item-input');
+            const expInput = document.getElementById('expiry-input');
+            const imgInput = document.getElementById('image-input');
+            const zone = document.getElementById('zone-select').value;
+            const shelf = document.getElementById('shelf-select').value;
+            const itemName = input.value.trim();
+
+            if (!itemName) return;
+
+            const lower = itemName.toLowerCase();
+            appState.inventory[zone][shelf].push({ 
+                id: `item_${Date.now()}`,
+                name: lower, 
+                displayName: itemName, 
+                expiry: expInput.value || '2026-08-01',
+                img: imgInput.value.trim()
+            });
+
+            if (!appState.nutritionDb[lower]) {
+                appState.nutritionDb[lower] = { p: 15, c: 15, f: 5, kcal: 165, store: "Lidl", price: 1.50, quality: "★★★★☆" };
+            }
+
+            renderInventory();
+            input.value = ''; expInput.value = ''; imgInput.value = '';
+        }
+
+        function removeItem(zone, shelf, itemId, event) {
+            event.stopPropagation();
+            appState.inventory[zone][shelf] = appState.inventory[zone][shelf].filter(item => item.id !== itemId);
+            renderInventory();
+        }
+
+        function inspectItem(item, zone) {
+            const status = getExpiryStatus(item.expiry);
+            document.getElementById('modal-title').innerText = item.displayName;
+            document.getElementById('modal-content').innerHTML = `
+                <div style="padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; font-weight: 900;" class="${status.class}">
+                    STATUS: ${status.label.toUpperCase()}
+                </div>
+                <p><strong>Storage Zone:</strong> ${zone.toUpperCase()}</p>
+                <p><strong>Best Before / Use By:</strong> ${item.expiry}</p>
+            `;
+            document.getElementById('inspector-modal').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function renderInventory() {
+            ['fridge', 'pantry', 'spice'].forEach(zone => {
+                ['top', 'bottom'].forEach(shelf => {
+                    const shelfElem = document.getElementById(`shelf-${zone}-${shelf}`);
+                    const items = appState.inventory[zone][shelf];
+
+                    shelfElem.innerHTML = items.length 
+                        ? items.map(i => {
+                            const status = getExpiryStatus(i.expiry);
+                            const isSpice = zone === 'spice';
+                            const spiceColor = getSpiceColor(i.name);
+
+                            return `
+                                <div class="food-pill ${status.class}" onclick="inspectItem(${JSON.stringify(i).replace(/"/g, '&quot;')}, '${zone}')">
+                                    <div class="remove-btn" onclick="removeItem('${zone}', '${shelf}', '${i.id}', event)" title="Throw Out Item">✖</div>
+                                    ${isSpice ? `
+                                        <div class="spice-jar-container">
+                                            <div class="spice-lid"></div>
+                                            <div class="spice-label-strip">${i.displayName}</div>
+                                            <div class="spice-fill" style="background: ${spiceColor};"></div>
+                                        </div>
+                                    ` : (i.img ? `<img src="${i.img}" class="product-img" alt="${i.displayName}" />` : '')}
+                                    <span>${i.displayName}</span>
+                                    <span class="expiry-tag">${status.label}</span>
+                                </div>`;
+                        }).join('') 
+                        : `<span class="empty-label">Empty</span>`;
+                });
+            });
+        }
+
+        function toggleView() { navigateTo(appState.currentView === 'fridge' ? 'planner' : 'fridge'); }
+
+        function navigateTo(targetView) {
+            appState.currentView = targetView;
+            const fridgePanel = document.getElementById('fridge-view-panel');
+            const plannerPanel = document.getElementById('planner-view-panel');
+            const toggleBtn = document.getElementById('view-toggle-btn');
+
+            if (targetView === 'planner') {
+                fridgePanel.classList.add('hidden');
+                plannerPanel.classList.remove('hidden');
+                toggleBtn.innerText = "Switch to Workspace";
+                resetWizard();
+            } else {
+                plannerPanel.classList.add('hidden');
+                fridgePanel.classList.remove('hidden');
+                toggleBtn.innerText = "Switch to Planner";
+                renderInventory();
+            }
+        }
+
+        document.getElementById('expiry-input').value = new Date().toISOString().split('T')[0];
+        renderInventory();
     </script>
 </body>
 </html>
