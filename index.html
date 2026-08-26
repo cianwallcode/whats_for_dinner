@@ -3,948 +3,1426 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What's for Dinner - Minimal Planner & Storage Twin</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><path d=%22M2 16L10 24L30 8%22 stroke=%22%23FF8C00%22 stroke-width=%224%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22 fill=%22none%22/></svg>">
-    
+    <title>What's For Dinner - Integrated Kitchen Codex</title>
     <style>
-        :root { 
-            --orange: #FF8C00; 
-            --white: #FFFFFF; 
-            --charcoal: #222222; 
-            --light-gray: #FAFAFA;
-            --fridge-bg: #E8EEF5;
-            --pantry-wood: #8B5A2B;
-            --pantry-wood-light: #D2B48C;
-            --spice-wood: #5C3A21;
-            --glass-shelf: rgba(200, 220, 235, 0.5);
-            --led-glow: rgba(225, 245, 255, 0.95);
-            
-            --status-green: #2e7d32;
-            --status-green-bg: #e8f5e9;
-            --status-yellow: #f57f17;
-            --status-yellow-bg: #fffde7;
-            --status-red: #c62828;
-            --status-red-bg: #ffebee;
-        }
-        
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
-        body { background-color: var(--white); color: var(--charcoal); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
-        
-        header { padding: 1.5rem 2rem; width: 100%; z-index: 100; display: flex; justify-content: space-between; align-items: center; background: var(--white); border-bottom: 1px solid #f0f0f0; }
-        .logo { font-weight: 900; font-size: 1.5rem; letter-spacing: -1px; text-transform: uppercase; cursor: pointer; color: var(--charcoal); }
-        .nav-link { font-weight: 600; font-size: 0.9rem; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; padding-bottom: 2px; }
-        .nav-link:hover { border-color: var(--charcoal); }
-        
-        main { flex: 1; display: flex; padding: 2rem; justify-content: center; align-items: flex-start; }
-        .view-panel { width: 100%; display: flex; flex-direction: column; }
-        .hidden { display: none !important; }
-        
-        h1 { font-size: 2.2rem; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; line-height: 1; margin-bottom: 0.5rem; }
-        .subtitle { font-size: 0.85rem; font-weight: 500; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.5rem; }
-
-        .mode-toggle-bar { display: flex; gap: 0.5rem; justify-content: center; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; }
-        .mode-btn { padding: 0.6rem 1rem; border: 2px solid var(--charcoal); border-radius: 8px; background: var(--white); font-weight: 800; font-size: 0.75rem; text-transform: uppercase; cursor: pointer; transition: all 0.15s ease; }
-        .mode-btn.active { background: var(--charcoal); color: var(--white); }
-        .mode-btn.bachelor-btn { background: var(--orange); color: var(--white); border-color: var(--orange); }
-
-        /* STORAGE WORKSPACE */
-        .storage-workspace { display: flex; gap: 1.5rem; justify-content: center; align-items: flex-start; width: 100%; max-width: 1250px; margin: 0 auto 2rem auto; flex-wrap: wrap; perspective: 1000px; }
-        .storage-chassis { flex: 1; min-width: 310px; max-width: 380px; height: 440px; border: 10px solid var(--charcoal); border-radius: 20px; display: flex; flex-direction: column; padding: 15px; gap: 10px; position: relative; overflow: hidden; background: #222; }
-        .chassis-title { font-size: 0.85rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; text-align: center; padding-bottom: 6px; border-bottom: 2px solid var(--charcoal); z-index: 2; color: var(--charcoal); background: rgba(255,255,255,0.85); border-radius: 6px; }
-
-        .fridge-chassis { background: var(--fridge-bg); border-color: #2b303a; }
-        .fridge-chassis.door-open { background: var(--led-glow); box-shadow: 0 0 35px rgba(180, 230, 255, 0.8), inset 0 0 25px rgba(255, 255, 255, 1); }
-        .pantry-chassis { background: var(--pantry-wood-light); border-color: var(--pantry-wood); }
-        .spice-chassis { background: #3d2314; border-color: var(--spice-wood); }
-
-        .compartment { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; position: relative; padding-bottom: 8px; z-index: 1; }
-        .glass-shelf-line { height: 8px; background: var(--glass-shelf); border-top: 1px solid rgba(255,255,255,0.9); border-bottom: 2px solid rgba(0,0,0,0.15); border-radius: 2px; width: 100%; }
-        .wood-shelf-line { height: 12px; background: var(--pantry-wood); border-bottom: 3px solid rgba(0,0,0,0.3); border-radius: 2px; width: 100%; }
-
-        .item-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; align-items: flex-end; margin-bottom: 6px; width: 100%; max-height: 125px; overflow-y: auto; }
-        
-        .food-pill { 
-            padding: 0.4rem 0.5rem; font-size: 0.65rem; font-weight: 800; text-transform: uppercase;
-            border: 2px solid var(--charcoal); border-radius: 10px; display: flex; flex-direction: column; align-items: center; gap: 3px; 
-            box-shadow: 0 3px 0 var(--charcoal); width: 105px; text-align: center; position: relative; cursor: pointer; transition: transform 0.15s ease;
-        }
-        .food-pill:hover { transform: translateY(-3px) scale(1.03); }
-        .food-pill.status-green { background: var(--status-green-bg); color: var(--status-green); border-color: var(--status-green); }
-        .food-pill.status-yellow { background: var(--status-yellow-bg); color: var(--status-yellow); border-color: var(--status-yellow); }
-        .food-pill.status-red { background: var(--status-red-bg); color: var(--status-red); border-color: var(--status-red); }
-
-        .spice-jar-container {
-            width: 38px; height: 50px; position: relative; border-radius: 6px 6px 4px 4px;
-            background: rgba(255,255,255,0.3); border: 2px solid rgba(255,255,255,0.8);
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.2), 0 3px 6px rgba(0,0,0,0.3);
-            display: flex; flex-direction: column; justify-content: flex-end; align-items: center; overflow: hidden;
-            margin-bottom: 2px;
-        }
-        .spice-lid { position: absolute; top: 0; width: 100%; height: 10px; background: #C0C0C0; border-bottom: 1px solid #888; }
-        .spice-fill { width: 100%; height: 75%; border-radius: 0 0 2px 2px; }
-        .spice-label-strip {
-            position: absolute; top: 14px; width: 85%; height: 12px; background: #FFF8DC;
-            border: 1px solid #8B5A2B; font-size: 0.4rem; font-weight: 900; color: #3d2314;
-            display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden;
+        :root {
+            --book-spine: #0f172a;
+            --page-bg: #ffffff;
+            --page-border: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #0066EE;
+            --primary-hover: #0052c2;
+            --success: #16a34a;
+            --success-bg: #dcfce7;
+            --danger: #ef4444;
+            --danger-bg: #fee2e2;
+            --warning: #f59e0b;
+            --warning-bg: #fef3c7;
+            --chip-bg: #f8fafc;
         }
 
-        .food-pill img.product-img { width: 32px; height: 32px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(0,0,0,0.15); }
-        .food-pill .expiry-tag { font-size: 0.55rem; font-weight: 900; letter-spacing: -0.3px; }
-        
-        .remove-btn {
-            position: absolute; top: -6px; right: -6px; background: var(--charcoal); color: var(--white);
-            border: 1px solid var(--white); border-radius: 50%; width: 18px; height: 18px; font-size: 0.55rem;
-            display: flex; justify-content: center; align-items: center; cursor: pointer; font-weight: 900; z-index: 5;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
         }
-        .remove-btn:hover { background: var(--status-red); transform: scale(1.15); }
 
-        .empty-label { color: #888; font-style: italic; font-size: 0.8rem; margin-bottom: 15px; }
-
-        .door-panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; display: flex; transform-origin: left center; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
-        .door-panel.open { transform: rotateY(-110deg); }
-        .fridge-door { background: linear-gradient(135deg, #e6e6e6 0%, #cccccc 100%); border: 4px solid #aaa; display: flex; align-items: center; justify-content: flex-end; padding-right: 20px; }
-        .fridge-door .handle { width: 12px; height: 120px; background: #888; border-radius: 6px; }
-        .pantry-door { background: var(--pantry-wood); border: 4px solid #5c3a21; display: flex; align-items: center; justify-content: flex-end; padding-right: 20px; }
-        .pantry-door .handle { width: 10px; height: 80px; background: #d2b48c; border-radius: 4px; }
-        .spice-glass-door { width: 100%; height: 100%; background: rgba(255, 255, 255, 0.25); border: 6px solid var(--spice-wood); backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: flex-end; padding-right: 15px; }
-        .spice-glass-door .handle { width: 8px; height: 60px; background: #e0e0e0; border-radius: 3px; }
-        .door-hint { position: absolute; bottom: 12px; right: 12px; font-size: 0.6rem; font-weight: 900; text-transform: uppercase; background: var(--orange); color: var(--white); padding: 3px 6px; border-radius: 4px; }
-
-        .controls-wrapper { max-width: 620px; margin: 0 auto; width: 100%; }
-        .input-matrix { display: grid; grid-template-columns: 2fr 1fr; gap: 0.5rem; margin-top: 0.5rem; }
-        .control-element { padding: 0.8rem; border: 2px solid var(--charcoal); font-weight: bold; font-size: 0.85rem; border-radius: 12px; outline: none; background: var(--white); }
-        button.action-trigger { background: var(--charcoal); color: var(--white); cursor: pointer; border-radius: 12px; border: 2px solid var(--charcoal); font-weight: 900; text-transform: uppercase; padding: 0.8rem; }
-        button.action-trigger.accent { background: var(--orange); border-color: var(--orange); }
-
-        /* UNBOXED MINIMAL STEP WIZARD STYLES */
-        .wizard-unboxed { max-width: 540px; margin: 0 auto; width: 100%; padding: 1rem 0; text-align: center; }
-        
-        .minimal-progress-bar { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin-bottom: 2.5rem; overflow: hidden; }
-        .minimal-progress-fill { height: 100%; background: var(--orange); width: 12.5%; transition: width 0.3s ease; }
-
-        .step-panel { display: flex; flex-direction: column; gap: 1.2rem; min-height: 240px; justify-content: center; align-items: center; }
-        .step-panel h2 { font-size: 1.6rem; font-weight: 900; text-transform: uppercase; letter-spacing: -0.5px; }
-        
-        .option-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; width: 100%; margin-top: 0.5rem; }
-        .option-grid.single-col { grid-template-columns: 1fr; }
-
-        .select-card {
-            border: 3px solid var(--charcoal); border-radius: 14px; padding: 1.2rem 1rem;
-            font-size: 1.1rem; font-weight: 900; text-transform: uppercase; cursor: pointer;
-            background: var(--white); transition: all 0.15s ease; box-shadow: 4px 4px 0 var(--charcoal);
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem;
+        body {
+            background-color: #090d16;
+            background-image: radial-gradient(#1e293b 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
         }
-        .select-card:hover { background: var(--orange); color: var(--white); border-color: var(--orange); transform: translateY(-2px); }
-        .select-card .sub-text { font-size: 0.75rem; font-weight: 700; opacity: 0.8; text-transform: none; }
 
-        .step-nav { display: flex; justify-content: space-between; margin-top: 2.5rem; width: 100%; }
-
-        /* CENTERED MEAL HERO & FINAL RESULTS OVERVIEW PANEL */
-        .results-container { max-width: 900px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 2rem; }
-        
-        .meal-hero-card {
-            width: 100%; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: var(--white); border: 4px solid var(--charcoal); border-radius: 20px; padding: 2rem; box-shadow: 8px 8px 0 var(--charcoal);
+        .book-container {
+            width: 100%;
+            max-width: 1400px;
+            background: var(--book-spine);
+            border-radius: 16px;
+            padding: 20px 20px 20px 0;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            display: flex;
+            position: relative;
+            min-height: 850px;
         }
-        .meal-hero-card h2 { font-size: 2.2rem; font-weight: 900; text-transform: uppercase; letter-spacing: -1px; color: var(--orange); margin-bottom: 0.3rem; }
-        .meal-hero-card p { font-size: 0.95rem; font-weight: 700; color: #555; text-transform: uppercase; margin-bottom: 1.2rem; }
-        .meal-hero-img { width: 100%; max-width: 480px; height: 280px; object-fit: cover; border-radius: 14px; border: 3px solid var(--charcoal); box-shadow: 4px 4px 0 var(--charcoal); }
 
-        .breakdown-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; width: 100%; }
-        @media (max-width: 800px) { .breakdown-grid { grid-template-columns: 1fr; } }
+        .book-tabs {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding-top: 2.5rem;
+            width: 200px;
+            z-index: 10;
+        }
 
-        .analysis-card { border: 3px solid var(--charcoal); padding: 1.5rem; background: var(--white); border-radius: 16px; box-shadow: 5px 5px 0 var(--charcoal); }
-        .analysis-card h3 { font-size: 1.1rem; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem; border-bottom: 2px solid #f0f0f0; padding-bottom: 0.5rem; }
+        .tab-btn {
+            background: #1e293b;
+            color: #94a3b8;
+            border: none;
+            padding: 0.9rem 1.2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            cursor: pointer;
+            text-align: left;
+            border-radius: 10px 0 0 10px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            border-left: 4px solid transparent;
+        }
 
-        .macro-comparison-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; font-weight: 800; }
-        .macro-comparison-table th { text-transform: uppercase; color: #666; font-size: 0.7rem; text-align: left; padding-bottom: 0.5rem; border-bottom: 2px solid var(--charcoal); }
-        .macro-comparison-table td { padding: 0.6rem 0; border-bottom: 1px dashed #e0e0e0; }
-        .delta-tag { padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 900; }
-        .delta-tag.surplus { background: #ffebee; color: #c62828; }
-        .delta-tag.deficit { background: #e8f5e9; color: #2e7d32; }
+        .tab-btn:hover {
+            background: #334155;
+            color: #f8fafc;
+            padding-left: 1.3rem;
+        }
 
-        .shop-breakdown-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; font-weight: 800; padding: 0.6rem 0; border-bottom: 1px dashed #ccc; }
-        .shop-badge { font-size: 0.65rem; font-weight: 900; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; background: var(--charcoal); color: var(--white); }
-        .quality-star { color: #FFB300; }
+        .tab-btn.active {
+            background: var(--page-bg);
+            color: var(--primary);
+            font-weight: 700;
+            border-left: 4px solid var(--primary);
+            box-shadow: -6px 4px 12px rgba(0, 0, 0, 0.3);
+        }
 
-        /* MODAL STYLES */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; justify-content: center; align-items: center; }
-        .modal-card { background: var(--white); border: 4px solid var(--charcoal); border-radius: 16px; padding: 2rem; width: 90%; max-width: 480px; box-shadow: 8px 8px 0 var(--charcoal); position: relative; }
-        .modal-close { position: absolute; top: 12px; right: 12px; cursor: pointer; font-weight: 900; font-size: 1.2rem; background: var(--charcoal); color: var(--white); border-radius: 50%; width: 28px; height: 28px; display: flex; justify-content: center; align-items: center; }
+        .book-page {
+            flex: 1;
+            background: var(--page-bg);
+            border-radius: 8px;
+            padding: 2.5rem;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.02);
+            border: 1px solid var(--page-border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            max-height: 850px;
+        }
 
-        .recipe-list-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid #eee; font-weight: 700; font-size: 0.85rem; }
+        .brand-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--page-border);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
 
-        footer { padding: 1rem; text-align: center; font-size: 0.65rem; color: #aaa; border-top: 1px solid #eee; background: var(--white); margin-top: auto; }
+        .brand-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--book-spine);
+            letter-spacing: -0.02em;
+            cursor: pointer;
+        }
+
+        .brand-title span { color: var(--primary); }
+
+        .page-view { display: none; }
+        .page-view.active { display: block; }
+
+        .card {
+            background: #ffffff;
+            border: 1px solid var(--page-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: var(--book-spine);
+            margin-bottom: 1rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group { margin-bottom: 1rem; }
+        
+        label {
+            display: block;
+            font-size: 0.725rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.4rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.7rem 0.85rem;
+            border: 1px solid var(--page-border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            background: #fff;
+            transition: border-color 0.15s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0,102,238,0.1);
+        }
+
+        button.btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.4rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.15s ease, transform 0.1s ease;
+        }
+        button.btn-primary:hover { 
+            background: var(--primary-hover); 
+        }
+        button.btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .summary-dashboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            background: #f8fafc;
+            border: 1px solid var(--page-border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+
+        .metric-val {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--primary);
+            margin: 0.2rem 0;
+        }
+
+        .metric-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .wizard-card {
+            max-width: 600px;
+            margin: 1rem auto;
+            text-align: center;
+        }
+        .wizard-step { display: none; }
+        .wizard-step.active { display: block; }
+        
+        .wizard-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .opt-btn {
+            background: #ffffff;
+            border: 1px solid var(--page-border);
+            padding: 1.25rem 1rem;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+        .opt-btn:hover {
+            border-color: var(--primary);
+            background: #f4f8ff;
+            color: var(--primary);
+        }
+        .opt-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* DIGITAL TWIN STYLES */
+        .twin-containers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            perspective: 1000px;
+        }
+
+        .door-appliance {
+            background: #cbd5e1;
+            border: 4px solid #94a3b8;
+            border-radius: 12px;
+            height: 480px;
+            position: relative;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        .appliance-interior {
+            padding: 1rem;
+            height: 100%;
+            background: #f1f5f9;
+            overflow-y: auto;
+            border-radius: 8px;
+        }
+
+        .appliance-door {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
+            border: 2px solid #94a3b8;
+            border-radius: 8px;
+            z-index: 5;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-origin: left center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.15);
+        }
+
+        .door-handle {
+            width: 12px;
+            height: 80px;
+            background: #475569;
+            border-radius: 6px;
+            position: absolute;
+            right: 20px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .door-appliance.open .appliance-door {
+            transform: rotateY(-105deg);
+        }
+
+        .inventory-card {
+            background: white;
+            border: 1px solid var(--page-border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.6rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            position: relative;
+        }
+
+        .inventory-card.warning-exp {
+            border-left: 4px solid var(--warning);
+            background: #fffdf5;
+        }
+
+        .inventory-card.danger-exp {
+            border-left: 4px solid var(--danger);
+            background: #fef8f8;
+        }
+
+        .inventory-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .inventory-card-meta {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .badge-status {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .badge-fresh { background: var(--success-bg); color: var(--success); }
+        .badge-soon { background: var(--warning-bg); color: var(--warning); }
+        .badge-expired { background: var(--danger-bg); color: var(--danger); }
+
+        .btn-del {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            position: absolute;
+            top: 0.6rem;
+            right: 0.6rem;
+        }
+        .btn-del:hover { color: var(--danger); }
+
+        /* RECIPE MATRIX & MAP STYLES */
+        .world-map-container {
+            background: #0f172a;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .map-nodes-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin-top: 0.8rem;
+        }
+
+        .map-node-btn {
+            background: #1e293b;
+            color: #94a3b8;
+            border: 1px solid #334155;
+            padding: 0.5rem 0.9rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .map-node-btn:hover, .map-node-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .multidex-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .recipe-card {
+            background: white;
+            border: 1px solid var(--page-border);
+            border-top: 4px solid var(--primary);
+            border-radius: 10px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .ingredient-status {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.55rem;
+            border-radius: 4px;
+            font-weight: 700;
+            display: inline-block;
+        }
+        .status-have { background: var(--success-bg); color: var(--success); }
+        .status-buy { background: var(--danger-bg); color: var(--danger); }
+
+        .tag-pill {
+            background: #f1f5f9;
+            font-size: 0.725rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            color: var(--text-muted);
+        }
+
+        .supermarket-badge {
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: #f8fafc;
+            border: 1px solid var(--page-border);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .portion-scaler {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #f1f5f9;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .portion-btn {
+            background: white;
+            border: 1px solid var(--page-border);
+            border-radius: 4px;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .storage-box {
+            background: #f8fafc;
+            border: 1px dashed var(--page-border);
+            border-radius: 6px;
+            padding: 0.6rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.8rem;
+        }
+
+        .meal-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 0.5rem;
+        }
+        .meal-table th, .meal-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--page-border);
+            text-align: left;
+        }
+        .meal-table th { background: #f8fafc; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        .meal-cat-row { background: #f1f5f9; font-weight: 700; color: var(--book-spine); }
     </style>
 </head>
 <body>
 
-    <datalist id="suggested-spices">
-        <option value="Garlic Powder"><option value="Smoked Paprika"><option value="Black Pepper">
-        <option value="Oregano"><option value="Cumin"><option value="Turmeric">
-        <option value="Chicken Breast"><option value="Salmon Fillet"><option value="Mince">
-        <option value="Spaghetti"><option value="Basmati Rice"><option value="Broccoli"><option value="Carrot">
-    </datalist>
-
-    <header>
-        <div class="logo" onclick="navigateTo('fridge')">What's for Dinner</div>
-        <div class="nav-link" id="view-toggle-btn" onclick="toggleView()">Switch to Planner</div>
-    </header>
-
-    <main id="app-container">
-        
-        <!-- MODULE A: STORAGE WORKSPACE -->
-        <div id="fridge-view-panel" class="view-panel">
-            <div style="text-align: center;">
-                <h1>Digital Twin Workspace</h1>
-                <div class="subtitle">Interactive Storage Chassis & Dynamic Expiry Monitoring</div>
-            </div>
-
-            <div class="mode-toggle-bar">
-                <button class="mode-btn bachelor-btn" onclick="setBachelorMode()">🎓 Bachelor Mode</button>
-                <button class="mode-btn active" id="btn-toggle-pantry" onclick="toggleZone('pantry')">+ Pantry Cabinet</button>
-                <button class="mode-btn active" id="btn-toggle-spice" onclick="toggleZone('spice')">+ Glass Spice Rack</button>
-            </div>
-            
-            <div class="storage-workspace">
-                <div class="storage-chassis fridge-chassis" id="fridge-unit">
-                    <div class="door-panel fridge-door" onclick="toggleDoor('fridge-unit', 'fridge')">
-                        <div class="handle"></div>
-                        <span class="door-hint">Click Door</span>
-                    </div>
-                    <div class="chassis-title">Refrigerated Chassis (LED Light)</div>
-                    <div class="compartment">
-                        <div class="item-row" id="shelf-fridge-top"></div>
-                        <div class="glass-shelf-line"></div>
-                    </div>
-                    <div class="compartment">
-                        <div class="item-row" id="shelf-fridge-bottom"></div>
-                        <div class="glass-shelf-line"></div>
-                    </div>
-                </div>
-
-                <div class="storage-chassis pantry-chassis" id="pantry-unit">
-                    <div class="door-panel pantry-door" onclick="toggleDoor('pantry-unit', 'pantry')">
-                        <div class="handle"></div>
-                        <span class="door-hint">Click Door</span>
-                    </div>
-                    <div class="chassis-title">Wooden Pantry Cabinet</div>
-                    <div class="compartment">
-                        <div class="item-row" id="shelf-pantry-top"></div>
-                        <div class="wood-shelf-line"></div>
-                    </div>
-                    <div class="compartment">
-                        <div class="item-row" id="shelf-pantry-bottom"></div>
-                        <div class="wood-shelf-line"></div>
-                    </div>
-                </div>
-
-                <div class="storage-chassis spice-chassis" id="spice-unit">
-                    <div class="door-panel spice-glass-door" onclick="toggleDoor('spice-unit', 'spice')">
-                        <div class="handle"></div>
-                        <span class="door-hint">Glass Door</span>
-                    </div>
-                    <div class="chassis-title" style="color: #fff; background: rgba(0,0,0,0.6);">Glass Spice Cabinet</div>
-                    <div class="compartment">
-                        <div class="item-row" id="shelf-spice-top"></div>
-                        <div class="wood-shelf-line"></div>
-                    </div>
-                    <div class="compartment">
-                        <div class="item-row" id="shelf-spice-bottom"></div>
-                        <div class="wood-shelf-line"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="controls-wrapper">
-                <div class="input-matrix">
-                    <input type="text" id="item-input" list="suggested-spices" class="control-element" placeholder="Item Name (e.g. Mince, Broccoli)" />
-                    <select id="zone-select" class="control-element">
-                        <option value="fridge">Fridge Target</option>
-                        <option value="pantry" id="opt-pantry">Pantry Target</option>
-                        <option value="spice" id="opt-spice">Spice Target</option>
-                    </select>
-                </div>
-                <div class="input-matrix" style="grid-template-columns: 1.2fr 1.2fr 1fr 1fr; margin-top: 0.5rem; margin-bottom: 1rem;">
-                    <input type="date" id="expiry-input" class="control-element" title="Best Before Date" />
-                    <input type="url" id="image-input" class="control-element" placeholder="Image URL" />
-                    <select id="shelf-select" class="control-element">
-                        <option value="top">Top Shelf</option>
-                        <option value="bottom">Bottom Shelf</option>
-                    </select>
-                    <button class="action-trigger accent" onclick="addItem()">Commit Item</button>
-                </div>
-            </div>
+    <div class="book-container">
+        <div class="book-tabs">
+            <button id="tab-tracker" class="tab-btn active" onclick="switchTab('tracker-view')">
+                📊 Daily Tracker
+            </button>
+            <button id="tab-survey" class="tab-btn" onclick="switchTab('survey-view')">
+                📜 Macro Wizard
+            </button>
+            <button id="tab-twin" class="tab-btn" onclick="switchTab('twin-view')">
+                🧊 Digital Twin
+            </button>
+            <button id="tab-multidex" class="tab-btn" onclick="switchTab('multidex-view')">
+                📖 Global Synthesizer
+            </button>
         </div>
 
-        <!-- MODULE B: UNBOXED MINIMAL STEP-BY-STEP PLANNER -->
-        <div id="planner-view-panel" class="view-panel hidden">
-            <div style="text-align: center;">
-                <h1>Nutrition & Meal Builder</h1>
-                <div class="subtitle">Interactive Guided Selection</div>
-            </div>
-
-            <!-- MINIMAL PROGRESS BAR & UNBOXED STEPS CONTAINER -->
-            <div id="wizard-unboxed-container" class="wizard-unboxed">
-                <div class="minimal-progress-bar">
-                    <div class="minimal-progress-fill" id="progress-fill"></div>
-                </div>
-
-                <!-- STEP 1: GENDER -->
-                <div class="step-panel" id="step-1">
-                    <h2>Select Gender</h2>
-                    <div class="option-grid">
-                        <div class="select-card" onclick="selectOption('gender', 'male')">♂ Male</div>
-                        <div class="select-card" onclick="selectOption('gender', 'female')">♀ Female</div>
-                    </div>
-                </div>
-
-                <!-- STEP 2: WEIGHT RANGE -->
-                <div class="step-panel hidden" id="step-2">
-                    <h2>Select Body Weight</h2>
-                    <div class="option-grid single-col">
-                        <div class="select-card" onclick="selectOption('weight', '60')">50 kg – 70 kg</div>
-                        <div class="select-card" onclick="selectOption('weight', '80')">70 kg – 90 kg</div>
-                        <div class="select-card" onclick="selectOption('weight', '100')">90 kg +</div>
-                    </div>
-                </div>
-
-                <!-- STEP 3: ACTIVITY LEVEL -->
-                <div class="step-panel hidden" id="step-3">
-                    <h2>Select Activity Level</h2>
-                    <div class="option-grid single-col">
-                        <div class="select-card" onclick="selectOption('activity', '1.2')">
-                            Sedentary
-                            <span class="sub-text">Little to no workouts</span>
-                        </div>
-                        <div class="select-card" onclick="selectOption('activity', '1.375')">
-                            Moderate
-                            <span class="sub-text">3–4 workouts per week</span>
-                        </div>
-                        <div class="select-card" onclick="selectOption('activity', '1.55')">
-                            Active
-                            <span class="sub-text">5+ intense workouts per week</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- STEP 4: GOAL -->
-                <div class="step-panel hidden" id="step-4">
-                    <h2>Select Fitness Goal</h2>
-                    <div class="option-grid single-col">
-                        <div class="select-card" onclick="selectOption('goal', 'cut')">Fat Loss</div>
-                        <div class="select-card" onclick="selectOption('goal', 'maintain')">Maintenance</div>
-                        <div class="select-card" onclick="selectOption('goal', 'build')">Muscle Gain</div>
-                    </div>
-                </div>
-
-                <!-- STEP 5: PROTEIN SELECTION (STRICTLY PROTEINS) -->
-                <div class="step-panel hidden" id="step-5">
-                    <h2>Select Protein Source</h2>
-                    <p style="font-size: 0.8rem; color: #666;">Categorized inventory items</p>
-                    <div class="option-grid single-col" id="protein-options-container"></div>
-                </div>
-
-                <!-- STEP 6: CARB SELECTION -->
-                <div class="step-panel hidden" id="step-6">
-                    <h2>Select Carbohydrate</h2>
-                    <p style="font-size: 0.8rem; color: #666;">Categorized inventory items</p>
-                    <div class="option-grid single-col" id="carb-options-container"></div>
-                </div>
-
-                <!-- STEP 7: VEGETABLE SELECTION -->
-                <div class="step-panel hidden" id="step-7">
-                    <h2>Select Vegetable</h2>
-                    <p style="font-size: 0.8rem; color: #666;">Fresh produce from inventory</p>
-                    <div class="option-grid single-col" id="veg-options-container"></div>
-                </div>
-
-                <!-- STEP 8: SPICE / SEASONING SELECTION -->
-                <div class="step-panel hidden" id="step-8">
-                    <h2>Select Spice / Seasoning</h2>
-                    <p style="font-size: 0.8rem; color: #666;">Glass cabinet seasonings</p>
-                    <div class="option-grid single-col" id="spice-options-container"></div>
-                    
-                    <button class="action-trigger" style="margin-top: 1rem; width: 100%; background: #555; border-color: #555;" onclick="openRecipeManager()">+ Manage Custom Recipes</button>
-                </div>
-
-                <!-- WIZARD NAVIGATION BACK BUTTON -->
-                <div class="step-nav">
-                    <button class="action-trigger" id="wizard-back-btn" onclick="prevStep()" style="visibility: hidden;">← Back</button>
+        <div class="book-page">
+            <div class="brand-header">
+                <div class="brand-title" onclick="resetToHome()">What's For <span>Dinner</span></div>
+                <div style="font-weight:600; font-size: 0.85rem; color: var(--text-muted);" id="live-macro-indicator">
+                    Daily Goal: 2,200 kcal | P: 140g
                 </div>
             </div>
 
-            <!-- FINAL RESULTS OVERVIEW PANEL -->
-            <div id="results-panel" class="hidden">
-                <div class="results-container">
-                    
-                    <!-- CENTERED HERO MEAL DISPLAY -->
-                    <div class="meal-hero-card">
-                        <h2 id="res-meal-title">Spaghetti Bolognese</h2>
-                        <p id="res-meal-ingredients-list">Mince • Spaghetti • Garlic • Paprika</p>
-                        <img id="res-meal-image" class="meal-hero-img" src="image_agent_tag_12883518791977636373" alt="Prepared Dish" />
+            <!-- 1. DAILY TRACKER (LANDING PAGE & DASHBOARD) -->
+            <section id="tracker-view" class="page-view active">
+                <div class="card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                        <div class="card-title" style="margin:0;">Daily Diary</div>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <label style="margin:0;">Date:</label>
+                            <input type="date" id="tracker-date" style="width:160px;" onchange="renderTracker()">
+                        </div>
                     </div>
 
-                    <!-- BREAKDOWN GRID BELOW -->
-                    <div class="breakdown-grid">
-                        
-                        <!-- MACRO BREAKDOWN & TARGET COMPARISON -->
-                        <div class="analysis-card">
-                            <h3>Nutritional Targets vs. Meal</h3>
-                            <table class="macro-comparison-table">
-                                <thead>
-                                    <tr>
-                                        <th>Metric</th>
-                                        <th>Target</th>
-                                        <th>Meal</th>
-                                        <th>Variance</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>Protein</td>
-                                        <td id="target-val-p">0g</td>
-                                        <td id="meal-val-p">0g</td>
-                                        <td id="delta-val-p"><span class="delta-tag deficit">0g</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Carbs</td>
-                                        <td id="target-val-c">0g</td>
-                                        <td id="meal-val-c">0g</td>
-                                        <td id="delta-val-c"><span class="delta-tag deficit">0g</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Fats</td>
-                                        <td id="target-val-f">0g</td>
-                                        <td id="meal-val-f">0g</td>
-                                        <td id="delta-val-f"><span class="delta-tag deficit">0g</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Energy</td>
-                                        <td id="target-val-k">0 kcal</td>
-                                        <td id="meal-val-k">0 kcal</td>
-                                        <td id="delta-val-k"><span class="delta-tag deficit">0 kcal</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                    <div class="summary-dashboard">
+                        <div>
+                            <label>Calories Logged</label>
+                            <div class="metric-val" id="dash-cals">0</div>
+                            <div class="metric-sub" id="sub-target-cals">/ 2,200 kcal Goal</div>
                         </div>
+                        <div>
+                            <label>Protein</label>
+                            <div class="metric-val" id="dash-protein">0g</div>
+                            <div class="metric-sub" id="sub-target-prot">/ 140g Goal</div>
+                        </div>
+                        <div>
+                            <label>Exercise Burned</label>
+                            <div class="metric-val" style="color: var(--success);" id="dash-burned">0</div>
+                            <div class="metric-sub">kcal burned</div>
+                        </div>
+                        <div>
+                            <label>Logged Weight</label>
+                            <div class="metric-val" style="color: var(--book-spine);" id="dash-weight">75.0</div>
+                            <div class="metric-sub">kg</div>
+                        </div>
+                    </div>
+                </div>
 
-                        <!-- CHEAPEST STORE & QUALITY BREAKDOWN PER ITEM -->
-                        <div class="analysis-card">
-                            <h3>Supermarket Price & Quality Match</h3>
-                            <div id="item-pricing-breakdown-list"></div>
-
-                            <div style="margin-top: 1.2rem; padding-top: 0.8rem; border-top: 2px solid var(--charcoal); display: flex; justify-content: space-between; align-items: center; font-weight: 900;">
-                                <span>Cheapest Basket: <span id="cheapest-store-name" style="color: var(--orange);">LIDL</span></span>
-                                <span id="cheapest-store-total" style="font-size: 1.2rem;">€0.00</span>
+                <div class="card">
+                    <div class="card-title">Log Food Entry</div>
+                    <form onsubmit="logMealEntry(event)">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Meal Type</label>
+                                <select id="log-meal-cat">
+                                    <option value="Breakfast">Breakfast</option>
+                                    <option value="Lunch">Lunch</option>
+                                    <option value="Dinner">Dinner</option>
+                                    <option value="Snacks">Snacks</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Food Description</label>
+                                <input type="text" id="log-food-name" placeholder="e.g. Chicken & Rice" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Calories (kcal)</label>
+                                <input type="number" id="log-food-cals" placeholder="650" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Protein (g)</label>
+                                <input type="number" id="log-food-prot" placeholder="45" required>
                             </div>
                         </div>
+                        <button type="submit" class="btn-primary">Add Entry to Diary</button>
+                    </form>
 
+                    <table class="meal-table">
+                        <thead>
+                            <tr>
+                                <th>Meal / Food Item</th>
+                                <th>Calories</th>
+                                <th>Protein</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tracker-tbody"></tbody>
+                    </table>
+                </div>
+
+                <div class="form-grid">
+                    <div class="card">
+                        <div class="card-title">Log Exercise</div>
+                        <form onsubmit="logExercise(event)">
+                            <div class="form-group">
+                                <label>Activity</label>
+                                <input type="text" id="log-ex-name" placeholder="e.g. Evening Run" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Burned Calories</label>
+                                <input type="number" id="log-ex-cals" placeholder="300" required>
+                            </div>
+                            <button type="submit" class="btn-primary">Log Exercise</button>
+                        </form>
                     </div>
 
-                    <button class="action-trigger" style="margin-top: 1rem; padding: 1rem 2rem;" onclick="resetWizard()">↺ Reconfigure Meal Plan</button>
+                    <div class="card">
+                        <div class="card-title">Log Weight</div>
+                        <form onsubmit="logWeight(event)">
+                            <div class="form-group">
+                                <label>Today's Weight (kg)</label>
+                                <input type="number" id="log-weight-val" step="0.1" placeholder="74.5" required>
+                            </div>
+                            <button type="submit" class="btn-primary">Update Weight</button>
+                        </form>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </main>
+            </section>
 
-    <!-- ITEM INSPECTOR POPUP MODAL -->
-    <div id="inspector-modal" class="modal-overlay hidden" onclick="closeModal('inspector-modal')">
-        <div class="modal-card" onclick="event.stopPropagation()">
-            <div class="modal-close" onclick="closeModal('inspector-modal')">✖</div>
-            <h2 id="modal-title" style="text-transform: uppercase; font-weight: 900; margin-bottom: 0.5rem;">Item Details</h2>
-            <div id="modal-content" style="font-size: 0.9rem; font-weight: 700; color: #444; line-height: 1.6; margin-top: 1rem;"></div>
-        </div>
-    </div>
-
-    <!-- CUSTOM RECIPE MANAGER MODAL -->
-    <div id="recipe-modal" class="modal-overlay hidden" onclick="closeModal('recipe-modal')">
-        <div class="modal-card" onclick="event.stopPropagation()">
-            <div class="modal-close" onclick="closeModal('recipe-modal')">✖</div>
-            <h2 style="text-transform: uppercase; font-weight: 900; margin-bottom: 0.5rem;">Custom Recipe Upload</h2>
-            
-            <div style="display:flex; flex-direction:column; gap:0.6rem; margin-top:1rem;">
-                <input type="text" id="custom-recipe-title" class="control-element" placeholder="Recipe Name (e.g. Spaghetti Bolognese)" />
-                <input type="text" id="custom-recipe-ing1" class="control-element" placeholder="Ingredient 1 Keyword (e.g. mince)" />
-                <input type="text" id="custom-recipe-ing2" class="control-element" placeholder="Ingredient 2 Keyword (e.g. spaghetti)" />
-                <button class="action-trigger accent" onclick="saveCustomRecipe()">Save Custom Recipe</button>
-            </div>
-
-            <div style="margin-top: 1.5rem; text-align: left;">
-                <h4 style="font-weight: 900; text-transform: uppercase; font-size: 0.8rem; margin-bottom: 0.5rem;">Saved Custom Recipes</h4>
-                <div id="saved-recipes-list"></div>
-            </div>
-        </div>
-    </div>
-
-    <footer>&copy; 2026 What's for Dinner. All rights reserved to all code we write.</footer>
-
-    <script>
-        const appState = {
-            currentView: 'fridge',
-            wizardStep: 1,
-            userSelections: {
-                gender: 'male',
-                weight: 80,
-                activity: 1.375,
-                goal: 'maintain',
-                protein: 'chicken breast',
-                carb: 'basmati rice',
-                veg: 'broccoli',
-                spice: 'garlic powder'
-            },
-            activeZones: { pantry: true, spice: true },
-            doors: { fridge: false, pantry: false, spice: false },
-            
-            // STRICT INVENTORY CATEGORIZATION DATABASE
-            categories: {
-                proteins: ["chicken breast", "chicken", "mince", "salmon", "salmon fillet", "beef", "steak"],
-                carbs: ["spaghetti", "basmati rice", "rice", "sweet potato", "pasta", "noodle"],
-                veggies: ["broccoli", "carrot", "spinach", "cucumber", "tomato", "bell pepper"],
-                spices: ["turmeric", "oregano", "paprika", "chili powder", "black pepper", "garlic powder", "cumin"]
-            },
-
-            inventory: {
-                fridge: { 
-                    top: [
-                        { id: "f_top_1", name: "chicken breast", displayName: "Chicken Breast", expiry: "2026-07-28", img: "https://images.unsplash.com/photo-1604503468506-a8da13d82791?w=100&auto=format&fit=crop&q=60" },
-                        { id: "f_top_2", name: "salmon fillet", displayName: "Salmon Fillet", expiry: "2026-07-29", img: "" }
-                    ], 
-                    bottom: [
-                        { id: "f_bot_1", name: "mince", displayName: "Mince", expiry: "2026-07-26", img: "" },
-                        { id: "f_bot_2", name: "broccoli", displayName: "Broccoli", expiry: "2026-07-30", img: "" }
-                    ] 
-                },
-                pantry: { 
-                    top: [{ id: "p_top_1", name: "spaghetti", displayName: "Spaghetti", expiry: "2027-01-01", img: "" }], 
-                    bottom: [{ id: "p_bot_1", name: "basmati rice", displayName: "Basmati Rice", expiry: "2026-08-10", img: "" }] 
-                },
-                spice: { 
-                    top: [
-                        { id: "s_top_1", name: "turmeric", displayName: "Turmeric", expiry: "2027-06-15", img: "" },
-                        { id: "s_top_2", name: "oregano", displayName: "Oregano", expiry: "2026-07-25", img: "" }
-                    ], 
-                    bottom: [
-                        { id: "s_bot_1", name: "garlic powder", displayName: "Garlic Powder", expiry: "2027-12-31", img: "" }
-                    ] 
-                }
-            },
-            spiceColors: {
-                "turmeric": "#FFB300",
-                "oregano": "#2E7D32",
-                "paprika": "#D32F2F",
-                "chili powder": "#C62828",
-                "black pepper": "#37474F",
-                "garlic powder": "#F5F5DC",
-                "cumin": "#8D6E63"
-            },
-            recipes: [
-                { title: "Spaghetti Bolognese", keywords: ["mince", "spaghetti"], img: "image_agent_tag_12883518791977636373" },
-                { title: "Healthy Chicken Rice Bowl", keywords: ["chicken", "rice"], img: "image_agent_tag_12883518791977631288" },
-                { title: "Caramelized Beef Rice Bowl", keywords: ["mince", "rice"], img: "image_agent_tag_12883518791977638848" }
-            ],
-            nutritionDb: {
-                "chicken breast": { p: 31, c: 0, f: 3.6, kcal: 165, store: "Lidl", price: 2.20, quality: "★★★★☆" },
-                "salmon fillet": { p: 25, c: 0, f: 12, kcal: 206, store: "Aldi", price: 3.10, quality: "★★★★★" },
-                "mince": { p: 24, c: 0, f: 15, kcal: 231, store: "Lidl", price: 2.50, quality: "★★★★☆" },
-                "spaghetti": { p: 5, c: 31, f: 0.9, kcal: 158, store: "Aldi", price: 0.45, quality: "★★★☆☆" },
-                "basmati rice": { p: 3.5, c: 28, f: 0.4, kcal: 130, store: "Lidl", price: 0.40, quality: "★★★★☆" },
-                "broccoli": { p: 2.8, c: 7, f: 0.4, kcal: 34, store: "Tesco", price: 0.89, quality: "★★★★★" },
-                "garlic powder": { p: 0.2, c: 1, f: 0, kcal: 5, store: "Lidl", price: 0.65, quality: "★★★★☆" },
-                "turmeric": { p: 0.1, c: 0.8, f: 0.1, kcal: 4, store: "Dunnes", price: 0.95, quality: "★★★★★" }
-            }
-        };
-
-        function getSpiceColor(name) {
-            const lower = name.toLowerCase();
-            for (let key in appState.spiceColors) {
-                if (lower.includes(key)) return appState.spiceColors[key];
-            }
-            return "#D2691E";
-        }
-
-        function getExpiryStatus(expiryDateStr) {
-            if (!expiryDateStr) return { class: 'status-green', label: 'Fresh' };
-            const today = new Date(); today.setHours(0,0,0,0);
-            const expDate = new Date(expiryDateStr); expDate.setHours(0,0,0,0);
-            const diffDays = Math.ceil((expDate - today) / (1000 * 60 * 60 * 24));
-
-            if (diffDays < 0) return { class: 'status-red', label: `Expired (${Math.abs(diffDays)}d ago)` };
-            if (diffDays <= 3) return { class: 'status-yellow', label: diffDays === 0 ? 'Expires Today' : `Expires in ${diffDays}d` };
-            return { class: 'status-green', label: `Good (${diffDays}d left)` };
-        }
-
-        /* MINIMAL STEP ENGINE WITH CATEGORY FILTERING */
-        function selectOption(key, val) {
-            appState.userSelections[key] = val;
-            nextStep();
-        }
-
-        function nextStep() {
-            document.getElementById(`step-${appState.wizardStep}`).classList.add('hidden');
-            appState.wizardStep++;
-
-            if (appState.wizardStep > 8) {
-                document.getElementById('wizard-unboxed-container').classList.add('hidden');
-                document.getElementById('results-panel').classList.remove('hidden');
-                calculateFinalResults();
-                return;
-            }
-
-            if (appState.wizardStep === 5) renderCategoryOptions('proteins', 'protein', 'protein-options-container');
-            if (appState.wizardStep === 6) renderCategoryOptions('carbs', 'carb', 'carb-options-container');
-            if (appState.wizardStep === 7) renderCategoryOptions('veggies', 'veg', 'veg-options-container');
-            if (appState.wizardStep === 8) renderCategoryOptions('spices', 'spice', 'spice-options-container');
-
-            document.getElementById(`step-${appState.wizardStep}`).classList.remove('hidden');
-            document.getElementById('progress-fill').style.width = `${(appState.wizardStep / 8) * 100}%`;
-            document.getElementById('wizard-back-btn').style.visibility = appState.wizardStep > 1 ? 'visible' : 'hidden';
-        }
-
-        function prevStep() {
-            if (appState.wizardStep <= 1) return;
-            document.getElementById(`step-${appState.wizardStep}`).classList.add('hidden');
-            appState.wizardStep--;
-            document.getElementById(`step-${appState.wizardStep}`).classList.remove('hidden');
-            document.getElementById('progress-fill').style.width = `${(appState.wizardStep / 8) * 100}%`;
-            document.getElementById('wizard-back-btn').style.visibility = appState.wizardStep > 1 ? 'visible' : 'hidden';
-        }
-
-        function resetWizard() {
-            appState.wizardStep = 1;
-            document.getElementById('results-panel').classList.add('hidden');
-            document.getElementById('wizard-unboxed-container').classList.remove('hidden');
-            
-            for (let i = 1; i <= 8; i++) {
-                document.getElementById(`step-${i}`).classList.add('hidden');
-            }
-            document.getElementById('step-1').classList.remove('hidden');
-            document.getElementById('progress-fill').style.width = '12.5%';
-            document.getElementById('wizard-back-btn').style.visibility = 'hidden';
-        }
-
-        function renderCategoryOptions(categoryKey, selectionKey, containerId) {
-            const container = document.getElementById(containerId);
-            const validKeywords = appState.categories[categoryKey];
-            let matchingItems = [];
-
-            Object.keys(appState.inventory).forEach(z => {
-                Object.keys(appState.inventory[z]).forEach(s => {
-                    appState.inventory[z][s].forEach(item => {
-                        const nameLower = item.name.toLowerCase();
-                        if (validKeywords.some(kw => nameLower.includes(kw))) {
-                            if (!matchingItems.some(i => i.name === item.name)) {
-                                matchingItems.push(item);
-                            }
-                        }
-                    });
-                });
-            });
-
-            if (matchingItems.length === 0) {
-                // Fallback default options if inventory lacks category items
-                if (categoryKey === 'proteins') {
-                    matchingItems = [
-                        { name: "chicken breast", displayName: "Chicken Breast" },
-                        { name: "mince", displayName: "Mince" },
-                        { name: "salmon fillet", displayName: "Salmon Fillet" }
-                    ];
-                } else if (categoryKey === 'veggies') {
-                    matchingItems = [
-                        { name: "broccoli", displayName: "Broccoli" },
-                        { name: "carrot", displayName: "Carrot" }
-                    ];
-                } else if (categoryKey === 'spices') {
-                    matchingItems = [
-                        { name: "garlic powder", displayName: "Garlic Powder" },
-                        { name: "turmeric", displayName: "Turmeric" }
-                    ];
-                }
-            }
-
-            container.innerHTML = matchingItems.map(i => `
-                <div class="select-card" onclick="selectOption('${selectionKey}', '${i.name}')">
-                    ${i.displayName}
-                </div>
-            `).join('');
-        }
-
-        function calculateFinalResults() {
-            const weight = parseFloat(appState.userSelections.weight) || 75;
-            const sex = appState.userSelections.gender;
-            const activity = parseFloat(appState.userSelections.activity);
-            const goal = appState.userSelections.goal;
-
-            let bmr = (10 * weight) + (6.25 * 175) - (5 * 25) + (sex === 'male' ? 5 : -161);
-            let tdee = bmr * activity;
-            if (goal === 'build') tdee += 300;
-            if (goal === 'cut') tdee -= 400;
-
-            const targetP = Math.round(weight * 2.0);
-            const targetF = Math.round((tdee * 0.25) / 9);
-            const targetC = Math.round((tdee - (targetP * 4) - (targetF * 9)) / 4);
-
-            document.getElementById('target-val-p').innerText = `${targetP}g`;
-            document.getElementById('target-val-c').innerText = `${targetC}g`;
-            document.getElementById('target-val-f').innerText = `${targetF}g`;
-            document.getElementById('target-val-k').innerText = `${Math.round(tdee)} kcal`;
-
-            const pKey = appState.userSelections.protein;
-            const cKey = appState.userSelections.carb;
-            const vKey = appState.userSelections.veg;
-            const sKey = appState.userSelections.spice;
-
-            const selectedItems = [pKey, cKey, vKey, sKey];
-
-            let mealP = 0, mealC = 0, mealF = 0, mealK = 0, totalPrice = 0;
-            let breakdownHtml = "";
-
-            selectedItems.forEach(itemKey => {
-                const itemData = appState.nutritionDb[itemKey] || { p: 15, c: 15, f: 3, kcal: 140, store: "Lidl", price: 1.50, quality: "★★★★☆" };
-                mealP += itemData.p; mealC += itemData.c; mealF += itemData.f; mealK += itemData.kcal;
-                totalPrice += itemData.price;
-
-                breakdownHtml += `
-                    <div class="shop-breakdown-row">
-                        <span>${capitalize(itemKey)}</span>
-                        <div>
-                            <span class="shop-badge">${itemData.store}</span>
-                            <span style="margin: 0 8px;">€${itemData.price.toFixed(2)}</span>
-                            <span class="quality-star">${itemData.quality}</span>
+            <!-- 2. MACRO QUESTIONNAIRE WIZARD -->
+            <section id="survey-view" class="page-view">
+                <div class="card wizard-card">
+                    
+                    <div id="wiz-step-1" class="wizard-step active">
+                        <h2 style="color:var(--book-spine); font-weight: 700;">Step 1: Select Biological Sex</h2>
+                        <div class="wizard-options">
+                            <button class="opt-btn" onclick="answerWiz('sex', 'male', 2)">♂ Male</button>
+                            <button class="opt-btn" onclick="answerWiz('sex', 'female', 2)">♀ Female</button>
                         </div>
                     </div>
-                `;
+
+                    <div id="wiz-step-2" class="wizard-step">
+                        <h2 style="color:var(--book-spine); font-weight: 700;">Step 2: Enter Body Metrics</h2>
+                        <div style="margin-top: 1.5rem; text-align: left;">
+                            <div class="form-group">
+                                <label>Weight (kg)</label>
+                                <input type="number" id="wiz-weight" value="75">
+                            </div>
+                            <div class="form-group">
+                                <label>Height (cm)</label>
+                                <input type="number" id="wiz-height" value="175">
+                            </div>
+                            <div class="form-group">
+                                <label>Age (years)</label>
+                                <input type="number" id="wiz-age" value="28">
+                            </div>
+                            <button class="btn-primary" onclick="nextWizStep(3)" style="width:100%;">Continue to Goals</button>
+                        </div>
+                    </div>
+
+                    <div id="wiz-step-3" class="wizard-step">
+                        <h2 style="color:var(--book-spine); font-weight: 700;">Step 3: Choose Goal</h2>
+                        <div class="wizard-options">
+                            <button class="opt-btn" onclick="answerWiz('goal', 'cut', 4)">Fat Loss (-15%)</button>
+                            <button class="opt-btn" onclick="answerWiz('goal', 'maintain', 4)">Maintenance</button>
+                            <button class="opt-btn" onclick="answerWiz('goal', 'bulk', 4)">Muscle Gain (+10%)</button>
+                        </div>
+                    </div>
+
+                    <div id="wiz-step-4" class="wizard-step">
+                        <h2 style="color:var(--book-spine); font-weight: 700;">Your Recommended Plan</h2>
+                        <div style="background:#f8fafc; padding:1rem; border-radius:8px; margin:1rem 0; border: 1px solid var(--page-border);" id="wiz-macro-summary"></div>
+                        <div id="wiz-suggested-meal" class="card" style="text-align:left; border-color:var(--primary);"></div>
+                        <button class="btn-primary" onclick="resetWiz()">Retake Questionnaire</button>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- 3. DIGITAL TWIN (WASTE REDUCTION ENGINE) -->
+            <section id="twin-view" class="page-view">
+                <div class="card">
+                    <div class="card-title">Stock Your Digital Twin & Track Expirations</div>
+                    <form onsubmit="addTwinItem(event)" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:0.8rem;">
+                        <div>
+                            <label>Storage Zone</label>
+                            <select id="twin-zone-select" required>
+                                <option value="Fridge">Fridge</option>
+                                <option value="Cupboard">Cupboard</option>
+                                <option value="Spice Rack">Spice Rack</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Item Name</label>
+                            <input type="text" id="twin-name-input" placeholder="e.g. Chicken Thighs" required>
+                        </div>
+                        <div>
+                            <label>Quantity</label>
+                            <input type="text" id="twin-qty-input" placeholder="e.g. 500g" required>
+                        </div>
+                        <div>
+                            <label>Opened Date</label>
+                            <input type="date" id="twin-opened-input" required>
+                        </div>
+                        <div>
+                            <label>Use By / Expiry Date</label>
+                            <input type="date" id="twin-expiry-input" required>
+                        </div>
+                        <div style="display:flex; align-items:flex-end;">
+                            <button type="submit" class="btn-primary" style="width:100%;">Add Item</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="twin-containers-grid">
+                    <div class="door-appliance" id="fridge-appliance">
+                        <div class="appliance-door" onclick="toggleDoor('fridge-appliance')">
+                            <div class="door-handle"></div>
+                            <h2 style="color:#334155; font-weight: 700;">Fridge</h2>
+                            <p style="font-size:0.8rem; color:#64748b; margin-top:0.4rem;">Click handle to open/close</p>
+                        </div>
+                        <div class="appliance-interior">
+                            <h4 style="margin-bottom:0.75rem; color:var(--book-spine); font-weight: 700;">Fridge Stock</h4>
+                            <div id="items-fridge"></div>
+                        </div>
+                    </div>
+
+                    <div class="door-appliance" id="cupboard-appliance">
+                        <div class="appliance-door" onclick="toggleDoor('cupboard-appliance')">
+                            <div class="door-handle"></div>
+                            <h2 style="color:#334155; font-weight: 700;">Cupboard</h2>
+                            <p style="font-size:0.8rem; color:#64748b; margin-top:0.4rem;">Click handle to open/close</p>
+                        </div>
+                        <div class="appliance-interior">
+                            <h4 style="margin-bottom:0.75rem; color:var(--book-spine); font-weight: 700;">Cupboard Stock</h4>
+                            <div id="items-cupboard"></div>
+                        </div>
+                    </div>
+
+                    <div class="door-appliance" id="spicerack-appliance">
+                        <div class="appliance-door" onclick="toggleDoor('spicerack-appliance')">
+                            <div class="door-handle"></div>
+                            <h2 style="color:#334155; font-weight: 700;">Spice Rack</h2>
+                            <p style="font-size:0.8rem; color:#64748b; margin-top:0.4rem;">Click handle to open/close</p>
+                        </div>
+                        <div class="appliance-interior">
+                            <h4 style="margin-bottom:0.75rem; color:var(--book-spine); font-weight: 700;">Spice Rack Stock</h4>
+                            <div id="items-spicerack"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. GLOBAL AI RECIPE MULTIDEX & MATRIX -->
+            <section id="multidex-view" class="page-view">
+                
+                <!-- WORLD MAP / GEOGRAPHIC REGION FILTER -->
+                <div class="world-map-container">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="font-weight: 700;">🌐 Interactive Global Recipe Map Filter</h4>
+                        <span style="font-size:0.75rem; color:#94a3b8;">Filter by Culinary Origin</span>
+                    </div>
+                    <div class="map-nodes-grid">
+                        <button class="map-node-btn active" onclick="setMapFilter('All')">🌍 All Origins</button>
+                        <button class="map-node-btn" onclick="setMapFilter('Italy')">🇮🇹 Italy</button>
+                        <button class="map-node-btn" onclick="setMapFilter('Japan')">🇯🇵 Japan</button>
+                        <button class="map-node-btn" onclick="setMapFilter('India')">🇮🇳 India</button>
+                        <button class="map-node-btn" onclick="setMapFilter('Mexico')">🇲🇽 Mexico</button>
+                        <button class="map-node-btn" onclick="setMapFilter('Thailand')">🇹🇭 Thailand</button>
+                        <button class="map-node-btn" onclick="setMapFilter('Mediterranean')">🇬🇷 Mediterranean</button>
+                    </div>
+                </div>
+
+                <!-- AI SYNTHESIZER & DEEP MATRIX FILTERS -->
+                <div class="card">
+                    <div class="card-title">AI Recipe Web Parser & Matrix Filters</div>
+                    <div style="display: flex; gap: 0.8rem; margin-bottom: 1.2rem;">
+                        <input type="text" id="synth-input" placeholder="Paste recipe URL or type query (e.g. 'One Pot Thai Red Curry with Chicken')">
+                        <button class="btn-primary" onclick="synthesizeRecipeLive()">AI Synthesize & Auto-Label</button>
+                    </div>
+
+                    <div class="form-grid">
+                        <div>
+                            <label>Protein / Category</label>
+                            <select id="flt-protein" onchange="renderMultidex()">
+                                <option value="All">All Proteins</option>
+                                <option value="Chicken">Chicken</option>
+                                <option value="Seafood">Seafood</option>
+                                <option value="Vegetarian">Vegetarian</option>
+                                <option value="Beef">Beef</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Cookware / Wash-Up</label>
+                            <select id="flt-cookware" onchange="renderMultidex()">
+                                <option value="All">All Cookware</option>
+                                <option value="One Pot">One Pot (Zero Wash-up)</option>
+                                <option value="Sheet Pan">Sheet Pan</option>
+                                <option value="Skillet">Skillet</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Supermarket Tier</label>
+                            <select id="flt-store" onchange="renderMultidex()">
+                                <option value="All">All Tiers</option>
+                                <option value="Budget">Budget (Aldi/Lidl)</option>
+                                <option value="Standard">Standard (Tesco/Sainsbury's)</option>
+                                <option value="Premium">Premium (Waitrose/M&S)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Max Prep/Cook Time</label>
+                            <select id="flt-time" onchange="renderMultidex()">
+                                <option value="999">Any Speed</option>
+                                <option value="15">Under 15 mins</option>
+                                <option value="30">Under 30 mins</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Sort By</label>
+                            <select id="flt-sort" onchange="renderMultidex()">
+                                <option value="default">Default Match</option>
+                                <option value="cals-asc">Calories (Low to High)</option>
+                                <option value="cals-desc">Calories (High to Low)</option>
+                                <option value="prot-desc">Protein (High to Low)</option>
+                                <option value="cost-asc">Cost (Cheapest First)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Inventory Match</label>
+                            <select id="flt-stock" onchange="renderMultidex()">
+                                <option value="All">All Recipes</option>
+                                <option value="Ready">100% In Stock</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="multidex-grid" id="multidex-grid"></div>
+            </section>
+
+        </div>
+    </div>
+
+    <script>
+        let wizardData = { sex: 'male', weight: 75, height: 175, age: 28, goal: 'cut' };
+        let calculatedMacros = { cals: 2200, protein: 140 };
+        let currentMapFilter = 'All';
+
+        // Enhanced Digital Twin data structure with Opened & Expiry dates
+        let digitalTwin = [
+            { id: 1, zone: 'Fridge', name: 'Chicken Thighs', qty: '500g', opened: '2026-04-17', expiry: '2026-04-21' },
+            { id: 2, zone: 'Fridge', name: 'Butter', qty: '100g', opened: '2026-04-10', expiry: '2026-05-15' },
+            { id: 3, zone: 'Cupboard', name: 'Chickpeas', qty: '2 cans', opened: '2026-04-01', expiry: '2026-12-31' },
+            { id: 4, zone: 'Cupboard', name: 'Rice', qty: '1 kg', opened: '2026-03-15', expiry: '2027-01-01' },
+            { id: 5, zone: 'Spice Rack', name: 'Garlic Powder', qty: '1 jar', opened: '2026-01-10', expiry: '2027-06-01' },
+            { id: 6, zone: 'Spice Rack', name: 'Cumin', qty: '1 jar', opened: '2026-02-01', expiry: '2027-06-01' }
+        ];
+
+        // Expanded Global Recipe Database with Portion Scaling, Storage & Multi-tier Metadata
+        let recipes = [
+            {
+                id: 1,
+                title: "Garlic Butter Chicken Thighs & Rice",
+                origin: "Mediterranean",
+                proteinTag: "Chicken",
+                cookware: "One Pot",
+                prepTime: 10,
+                cookTime: 20,
+                cals: 650,
+                proteinG: 48,
+                tier: "Standard",
+                costPerServ: 2.40,
+                baseServings: 1,
+                currentServings: 1,
+                ingredients: [
+                    { name: "Chicken Thighs", amount: 250, unit: "g" },
+                    { name: "Butter", amount: 20, unit: "g" },
+                    { name: "Rice", amount: 80, unit: "g" },
+                    { name: "Garlic Powder", amount: 5, unit: "g" }
+                ],
+                storage: "Store airtight in fridge for up to 3 days. Freeze cooked rice & chicken up to 1 month."
+            },
+            {
+                id: 2,
+                title: "One-Pan Lemon Herb Salmon & Asparagus",
+                origin: "Italy",
+                proteinTag: "Seafood",
+                cookware: "Sheet Pan",
+                prepTime: 5,
+                cookTime: 12,
+                cals: 520,
+                proteinG: 42,
+                tier: "Premium",
+                costPerServ: 5.50,
+                baseServings: 1,
+                currentServings: 1,
+                ingredients: [
+                    { name: "Salmon Fillet", amount: 180, unit: "g" },
+                    { name: "Asparagus", amount: 100, unit: "g" },
+                    { name: "Butter", amount: 15, unit: "g" }
+                ],
+                storage: "Eat fresh or refrigerate cooked salmon for up to 2 days."
+            },
+            {
+                id: 3,
+                title: "Chickpea & Cumin One-Pot Curry",
+                origin: "India",
+                proteinTag: "Vegetarian",
+                cookware: "One Pot",
+                prepTime: 5,
+                cookTime: 15,
+                cals: 420,
+                proteinG: 18,
+                tier: "Budget",
+                costPerServ: 0.95,
+                baseServings: 1,
+                currentServings: 1,
+                ingredients: [
+                    { name: "Chickpeas", amount: 1, unit: "can" },
+                    { name: "Cumin", amount: 5, unit: "g" },
+                    { name: "Garlic Powder", amount: 5, unit: "g" }
+                ],
+                storage: "Refrigerate up to 4 days. Tastes even better the next day."
+            },
+            {
+                id: 4,
+                title: "Sheet-Pan Chicken Teriyaki & Broccoli",
+                origin: "Japan",
+                proteinTag: "Chicken",
+                cookware: "Sheet Pan",
+                prepTime: 10,
+                cookTime: 15,
+                cals: 580,
+                proteinG: 45,
+                tier: "Standard",
+                costPerServ: 3.10,
+                baseServings: 1,
+                currentServings: 1,
+                ingredients: [
+                    { name: "Chicken Thighs", amount: 250, unit: "g" },
+                    { name: "Broccoli", amount: 150, unit: "g" },
+                    { name: "Rice", amount: 80, unit: "g" }
+                ],
+                storage: "Keep in meal prep containers in fridge for up to 4 days."
+            },
+            {
+                id: 5,
+                title: "One-Skillet Beef Fajita Bowl",
+                origin: "Mexico",
+                proteinTag: "Beef",
+                cookware: "Skillet",
+                prepTime: 10,
+                cookTime: 10,
+                cals: 610,
+                proteinG: 50,
+                tier: "Standard",
+                costPerServ: 3.80,
+                baseServings: 1,
+                currentServings: 1,
+                ingredients: [
+                    { name: "Beef Strips", amount: 200, unit: "g" },
+                    { name: "Peppers", amount: 100, unit: "g" },
+                    { name: "Cumin", amount: 5, unit: "g" }
+                ],
+                storage: "Store beef and peppers separately from salsa. Consume within 3 days."
+            },
+            {
+                id: 6,
+                title: "Thai Red Curry Seafood Noodle Pot",
+                origin: "Thailand",
+                proteinTag: "Seafood",
+                cookware: "One Pot",
+                prepTime: 8,
+                cookTime: 10,
+                cals: 490,
+                proteinG: 36,
+                tier: "Premium",
+                costPerServ: 4.90,
+                baseServings: 1,
+                currentServings: 1,
+                ingredients: [
+                    { name: "Prawns", amount: 150, unit: "g" },
+                    { name: "Coconut Milk", amount: 200, unit: "ml" },
+                    { name: "Noodles", amount: 100, unit: "g" }
+                ],
+                storage: "Best consumed immediately. Do not freeze."
+            }
+        ];
+
+        let historyDb = {};
+        const todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('tracker-date').value = todayStr;
+        document.getElementById('twin-opened-input').value = todayStr;
+        document.getElementById('twin-expiry-input').value = todayStr;
+
+        function resetToHome() {
+            switchTab('tracker-view');
+            renderDigitalTwin();
+            renderMultidex();
+        }
+
+        function switchTab(viewId) {
+            document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            document.getElementById(viewId).classList.add('active');
+
+            if (viewId === 'tracker-view') {
+                document.getElementById('tab-tracker').classList.add('active');
+                renderTracker();
+            }
+            if (viewId === 'survey-view') document.getElementById('tab-survey').classList.add('active');
+            if (viewId === 'twin-view') {
+                document.getElementById('tab-twin').classList.add('active');
+                renderDigitalTwin();
+            }
+            if (viewId === 'multidex-view') {
+                document.getElementById('tab-multidex').classList.add('active');
+                renderMultidex();
+            }
+        }
+
+        /* TRACKER LOGIC */
+        function renderTracker() {
+            const date = document.getElementById('tracker-date').value || todayStr;
+            if (!historyDb[date]) {
+                historyDb[date] = {
+                    meals: { Breakfast: [], Lunch: [], Dinner: [], Snacks: [] },
+                    burned: 0,
+                    weight: 75.0
+                };
+            }
+
+            const dayData = historyDb[date];
+            let totalCals = 0;
+            let totalProt = 0;
+            const tbody = document.getElementById('tracker-tbody');
+            tbody.innerHTML = '';
+
+            const categories = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
+            categories.forEach(cat => {
+                const items = dayData.meals[cat] || [];
+                tbody.innerHTML += '<tr class="meal-cat-row"><td colspan="3">' + cat + '</td></tr>';
+
+                if (items.length === 0) {
+                    tbody.innerHTML += '<tr><td colspan="3" style="color:var(--text-muted); font-size:0.85rem;">No entries logged</td></tr>';
+                } else {
+                    items.forEach(i => {
+                        totalCals += i.cals;
+                        totalProt += i.prot;
+                        tbody.innerHTML += 
+                            '<tr>' +
+                                '<td>' + i.name + '</td>' +
+                                '<td>' + i.cals + ' kcal</td>' +
+                                '<td>' + i.prot + 'g</td>' +
+                            '</tr>';
+                    });
+                }
             });
 
-            document.getElementById('meal-val-p').innerText = `${Math.round(mealP)}g`;
-            document.getElementById('meal-val-c').innerText = `${Math.round(mealC)}g`;
-            document.getElementById('meal-val-f').innerText = `${Math.round(mealF)}g`;
-            document.getElementById('meal-val-k').innerText = `${Math.round(mealK)} kcal`;
+            document.getElementById('dash-cals').innerText = totalCals;
+            document.getElementById('dash-protein').innerText = totalProt + 'g';
+            document.getElementById('dash-burned').innerText = dayData.burned;
+            document.getElementById('dash-weight').innerText = dayData.weight.toFixed(1);
+        }
 
-            // Render Macro Deltas
-            document.getElementById('delta-val-p').innerHTML = getDeltaTag(mealP - targetP, 'g');
-            document.getElementById('delta-val-c').innerHTML = getDeltaTag(mealC - targetC, 'g');
-            document.getElementById('delta-val-f').innerHTML = getDeltaTag(mealF - targetF, 'g');
-            document.getElementById('delta-val-k').innerHTML = getDeltaTag(mealK - tdee, ' kcal');
+        function logMealEntry(e) {
+            e.preventDefault();
+            const date = document.getElementById('tracker-date').value || todayStr;
+            const cat = document.getElementById('log-meal-cat').value;
+            const name = document.getElementById('log-food-name').value;
+            const cals = parseInt(document.getElementById('log-food-cals').value) || 0;
+            const prot = parseInt(document.getElementById('log-food-prot').value) || 0;
 
-            // Render Meal Hero Details
-            let mealTitle = "";
-            let mealImg = "image_agent_tag_12883518791977631288";
-
-            const matchedRecipe = appState.recipes.find(r => 
-                (pKey.includes(r.keywords[0]) && cKey.includes(r.keywords[1])) ||
-                (cKey.includes(r.keywords[0]) && pKey.includes(r.keywords[1]))
-            );
-
-            if (matchedRecipe) {
-                mealTitle = matchedRecipe.title;
-                if (matchedRecipe.img) mealImg = matchedRecipe.img;
-            } else {
-                mealTitle = `${capitalize(pKey)} & ${capitalize(cKey)} Bowl`;
+            if (!historyDb[date]) {
+                historyDb[date] = { meals: { Breakfast: [], Lunch: [], Dinner: [], Snacks: [] }, burned: 0, weight: 75.0 };
             }
 
-            document.getElementById('res-meal-title').innerText = mealTitle;
-            document.getElementById('res-meal-ingredients-list').innerText = `${capitalize(pKey)} • ${capitalize(cKey)} • ${capitalize(vKey)} • ${capitalize(sKey)}`;
-            document.getElementById('res-meal-image').src = mealImg;
+            historyDb[date].meals[cat].push({ name: name, cals: cals, prot: prot });
+            renderTracker();
 
-            document.getElementById('item-pricing-breakdown-list').innerHTML = breakdownHtml;
-            document.getElementById('cheapest-store-total').innerText = `€${totalPrice.toFixed(2)}`;
+            document.getElementById('log-food-name').value = '';
+            document.getElementById('log-food-cals').value = '';
+            document.getElementById('log-food-prot').value = '';
         }
 
-        function getDeltaTag(diff, unit) {
-            const rounded = Math.round(diff);
-            if (rounded >= 0) return `<span class="delta-tag surplus">+${rounded}${unit}</span>`;
-            return `<span class="delta-tag deficit">${rounded}${unit}</span>`;
-        }
+        function logExercise(e) {
+            e.preventDefault();
+            const date = document.getElementById('tracker-date').value || todayStr;
+            const cals = parseInt(document.getElementById('log-ex-cals').value) || 0;
 
-        function capitalize(str) {
-            if (!str) return '';
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
-
-        /* RECIPE MANAGER MODAL FUNCTIONS */
-        function openRecipeManager() {
-            renderSavedRecipes();
-            document.getElementById('recipe-modal').classList.remove('hidden');
-        }
-
-        function saveCustomRecipe() {
-            const title = document.getElementById('custom-recipe-title').value.trim();
-            const ing1 = document.getElementById('custom-recipe-ing1').value.trim().toLowerCase();
-            const ing2 = document.getElementById('custom-recipe-ing2').value.trim().toLowerCase();
-
-            if (!title || !ing1 || !ing2) return;
-
-            appState.recipes.push({ title: title, keywords: [ing1, ing2], img: "image_agent_tag_12883518791977631288" });
-            document.getElementById('custom-recipe-title').value = '';
-            document.getElementById('custom-recipe-ing1').value = '';
-            document.getElementById('custom-recipe-ing2').value = '';
-
-            renderSavedRecipes();
-        }
-
-        function renderSavedRecipes() {
-            const container = document.getElementById('saved-recipes-list');
-            container.innerHTML = appState.recipes.map((r, idx) => `
-                <div class="recipe-list-item">
-                    <span>${r.title} (${r.keywords.join(' + ')})</span>
-                    <button class="remove-btn" style="position:static;" onclick="deleteRecipe(${idx})">✖</button>
-                </div>
-            `).join('');
-        }
-
-        function deleteRecipe(idx) {
-            appState.recipes.splice(idx, 1);
-            renderSavedRecipes();
-        }
-
-        function toggleDoor(unitId, key) {
-            appState.doors[key] = !appState.doors[key];
-            const unit = document.getElementById(unitId);
-            const door = unit.querySelector('.door-panel');
-
-            if (appState.doors[key]) {
-                door.classList.add('open');
-                if (key === 'fridge') unit.classList.add('door-open');
-            } else {
-                door.classList.remove('open');
-                if (key === 'fridge') unit.classList.remove('door-open');
+            if (!historyDb[date]) {
+                historyDb[date] = { meals: { Breakfast: [], Lunch: [], Dinner: [], Snacks: [] }, burned: 0, weight: 75.0 };
             }
+
+            historyDb[date].burned += cals;
+            renderTracker();
+
+            document.getElementById('log-ex-name').value = '';
+            document.getElementById('log-ex-cals').value = '';
         }
 
-        function setBachelorMode() {
-            appState.activeZones.pantry = false;
-            appState.activeZones.spice = false;
-            document.getElementById('pantry-unit').classList.add('hidden');
-            document.getElementById('spice-unit').classList.add('hidden');
-            document.getElementById('btn-toggle-pantry').classList.remove('active');
-            document.getElementById('btn-toggle-spice').classList.remove('active');
-            document.getElementById('opt-pantry').style.display = 'none';
-            document.getElementById('opt-spice').style.display = 'none';
-            document.getElementById('zone-select').value = 'fridge';
-        }
+        function logWeight(e) {
+            e.preventDefault();
+            const date = document.getElementById('tracker-date').value || todayStr;
+            const weight = parseFloat(document.getElementById('log-weight-val').value) || 75.0;
 
-        function toggleZone(zoneKey) {
-            appState.activeZones[zoneKey] = !appState.activeZones[zoneKey];
-            const unitElem = document.getElementById(`${zoneKey}-unit`);
-            const btnElem = document.getElementById(`btn-toggle-${zoneKey}`);
-            const optElem = document.getElementById(`opt-${zoneKey}`);
-
-            if (appState.activeZones[zoneKey]) {
-                unitElem.classList.remove('hidden');
-                btnElem.classList.add('active');
-                optElem.style.display = 'block';
-            } else {
-                unitElem.classList.add('hidden');
-                btnElem.classList.remove('active');
-                optElem.style.display = 'none';
+            if (!historyDb[date]) {
+                historyDb[date] = { meals: { Breakfast: [], Lunch: [], Dinner: [], Snacks: [] }, burned: 0, weight: 75.0 };
             }
+
+            historyDb[date].weight = weight;
+            renderTracker();
+
+            document.getElementById('log-weight-val').value = '';
         }
 
-        function addItem() {
-            const input = document.getElementById('item-input');
-            const expInput = document.getElementById('expiry-input');
-            const imgInput = document.getElementById('image-input');
-            const zone = document.getElementById('zone-select').value;
-            const shelf = document.getElementById('shelf-select').value;
-            const itemName = input.value.trim();
+        /* WIZARD LOGIC */
+        function answerWiz(key, val, nextStep) {
+            wizardData[key] = val;
+            nextWizStep(nextStep);
+        }
 
-            if (!itemName) return;
+        function nextWizStep(stepNum) {
+            if (stepNum === 3) {
+                wizardData.weight = parseFloat(document.getElementById('wiz-weight').value) || 75;
+                wizardData.height = parseFloat(document.getElementById('wiz-height').value) || 175;
+                wizardData.age = parseFloat(document.getElementById('wiz-age').value) || 28;
+            }
 
-            const lower = itemName.toLowerCase();
-            appState.inventory[zone][shelf].push({ 
-                id: `item_${Date.now()}`,
-                name: lower, 
-                displayName: itemName, 
-                expiry: expInput.value || '2026-08-01',
-                img: imgInput.value.trim()
+            document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
+            document.getElementById('wiz-step-' + stepNum).classList.add('active');
+
+            if (stepNum === 4) calculateWizardResults();
+        }
+
+        function calculateWizardResults() {
+            let bmr = (10 * wizardData.weight) + (6.25 * wizardData.height) - (5 * wizardData.age) + (wizardData.sex === 'male' ? 5 : -161);
+            let tdee = bmr * 1.45;
+
+            if (wizardData.goal === 'cut') tdee *= 0.85;
+            if (wizardData.goal === 'bulk') tdee *= 1.10;
+
+            calculatedMacros.cals = Math.round(tdee);
+            calculatedMacros.protein = Math.round((calculatedMacros.cals * 0.30) / 4);
+
+            document.getElementById('live-macro-indicator').innerText = 
+                'Daily Goal: ' + calculatedMacros.cals + ' kcal | P: ' + calculatedMacros.protein + 'g';
+            document.getElementById('sub-target-cals').innerText = '/ ' + calculatedMacros.cals + ' kcal Goal';
+            document.getElementById('sub-target-prot').innerText = '/ ' + calculatedMacros.protein + 'g Goal';
+
+            document.getElementById('wiz-macro-summary').innerHTML = 
+                '<strong>Daily Target:</strong> ' + calculatedMacros.cals + ' kcal | ' + calculatedMacros.protein + 'g Protein';
+
+            const suggested = recipes[0];
+            const calPct = Math.round((suggested.cals / calculatedMacros.cals) * 100);
+            const protPct = Math.round((suggested.proteinG / calculatedMacros.protein) * 100);
+
+            document.getElementById('wiz-suggested-meal').innerHTML = 
+                '<h3 style="color:var(--primary); font-weight: 700;">' + suggested.title + '</h3>' +
+                '<p style="font-size:0.9rem; color:var(--text-muted); margin:0.4rem 0;">Suggested based on your metrics</p>' +
+                '<div style="margin-top:0.8rem; font-size:0.9rem;">' +
+                    '<div><strong>Calories:</strong> ' + suggested.cals + ' kcal (' + calPct + '% of daily target)</div>' +
+                    '<div><strong>Protein:</strong> ' + suggested.proteinG + 'g (' + protPct + '% of daily target)</div>' +
+                '</div>';
+        }
+
+        function resetWiz() { nextWizStep(1); }
+
+        /* DIGITAL TWIN LOGIC (EXPIRATION TRACKING) */
+        function toggleDoor(applianceId) {
+            document.getElementById(applianceId).classList.toggle('open');
+        }
+
+        function addTwinItem(e) {
+            e.preventDefault();
+            const zone = document.getElementById('twin-zone-select').value;
+            const name = document.getElementById('twin-name-input').value;
+            const qty = document.getElementById('twin-qty-input').value;
+            const opened = document.getElementById('twin-opened-input').value;
+            const expiry = document.getElementById('twin-expiry-input').value;
+
+            digitalTwin.push({
+                id: Date.now(),
+                zone: zone,
+                name: name,
+                qty: qty,
+                opened: opened,
+                expiry: expiry
             });
 
-            if (!appState.nutritionDb[lower]) {
-                appState.nutritionDb[lower] = { p: 15, c: 15, f: 5, kcal: 165, store: "Lidl", price: 1.50, quality: "★★★★☆" };
+            renderDigitalTwin();
+            renderMultidex();
+
+            document.getElementById('twin-name-input').value = '';
+            document.getElementById('twin-qty-input').value = '';
+        }
+
+        function removeTwinItem(id) {
+            digitalTwin = digitalTwin.filter(i => i.id !== id);
+            renderDigitalTwin();
+            renderMultidex();
+        }
+
+        function renderDigitalTwin() {
+            const zones = ['Fridge', 'Cupboard', 'Spice Rack'];
+            const today = new Date(todayStr);
+
+            zones.forEach(z => {
+                const containerId = 'items-' + z.toLowerCase().replace(' ', '');
+                const container = document.getElementById(containerId);
+                const items = digitalTwin.filter(i => i.zone === z);
+
+                if (items.length === 0) {
+                    container.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Empty</p>';
+                } else {
+                    container.innerHTML = items.map(i => {
+                        const expDate = new Date(i.expiry);
+                        const diffTime = expDate - today;
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                        let cardClass = "";
+                        let badgeHtml = "";
+
+                        if (diffDays < 0) {
+                            cardClass = "danger-exp";
+                            badgeHtml = '<span class="badge-status badge-expired">Expired (' + Math.abs(diffDays) + 'd ago)</span>';
+                        } else if (diffDays <= 3) {
+                            cardClass = "warning-exp";
+                            badgeHtml = '<span class="badge-status badge-soon">Expiring in ' + diffDays + 'd</span>';
+                        } else {
+                            badgeHtml = '<span class="badge-status badge-fresh">Fresh (' + diffDays + 'd left)</span>';
+                        }
+
+                        return '<div class="inventory-card ' + cardClass + '">' +
+                            '<button class="btn-del" onclick="removeTwinItem(' + i.id + ')">✕</button>' +
+                            '<div class="inventory-card-header">' +
+                                '<span>' + i.name + '</span>' +
+                            '</div>' +
+                            '<div class="inventory-card-meta">' +
+                                '<span>Qty: ' + i.qty + '</span>' +
+                                '<span>Opened: ' + i.opened + '</span>' +
+                            '</div>' +
+                            '<div style="margin-top:0.3rem;">' + badgeHtml + '</div>' +
+                        '</div>';
+                    }).join('');
+                }
+            });
+        }
+
+        /* GLOBAL RECIPE MATRIX & PARSER LOGIC */
+        function setMapFilter(origin) {
+            currentMapFilter = origin;
+            document.querySelectorAll('.map-node-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.innerText.includes(origin) || (origin === 'All' && btn.innerText.includes('All')));
+            });
+            renderMultidex();
+        }
+
+        function updateServings(recipeId, delta) {
+            const r = recipes.find(item => item.id === recipeId);
+            if (r) {
+                r.currentServings = Math.max(1, (r.currentServings || 1) + delta);
+                renderMultidex();
             }
-
-            renderInventory();
-            input.value = ''; expInput.value = ''; imgInput.value = '';
         }
 
-        function removeItem(zone, shelf, itemId, event) {
-            event.stopPropagation();
-            appState.inventory[zone][shelf] = appState.inventory[zone][shelf].filter(item => item.id !== itemId);
-            renderInventory();
+        async function synthesizeRecipeLive() {
+            const query = document.getElementById('synth-input').value;
+            if (!query) return;
+
+            // AI Web Parser Simulation
+            const isSeafood = query.toLowerCase().includes('salmon') || query.toLowerCase().includes('prawn') || query.toLowerCase().includes('fish');
+            const isVeg = query.toLowerCase().includes('chickpea') || query.toLowerCase().includes('tofu') || query.toLowerCase().includes('veg');
+            const proteinTag = isSeafood ? "Seafood" : (isVeg ? "Vegetarian" : "Chicken");
+            const cookware = query.toLowerCase().includes('sheet') ? "Sheet Pan" : "One Pot";
+
+            const newRecipe = {
+                id: Date.now(),
+                title: query.charAt(0).toUpperCase() + query.slice(1),
+                origin: "International",
+                proteinTag: proteinTag,
+                cookware: cookware,
+                prepTime: 10,
+                cookTime: 18,
+                cals: 540,
+                proteinG: 40,
+                tier: "Standard",
+                costPerServ: 3.20,
+                baseServings: 1,
+                currentServings: 1,
+                ingredients: [
+                    { name: "Chicken Thighs", amount: 200, unit: "g" },
+                    { name: "Garlic Powder", amount: 5, unit: "g" },
+                    { name: "Rice", amount: 80, unit: "g" }
+                ],
+                storage: "Store sealed in refrigerator for up to 3 days."
+            };
+
+            recipes.unshift(newRecipe);
+            document.getElementById('synth-input').value = '';
+            renderMultidex();
         }
 
-        function inspectItem(item, zone) {
-            const status = getExpiryStatus(item.expiry);
-            document.getElementById('modal-title').innerText = item.displayName;
-            document.getElementById('modal-content').innerHTML = `
-                <div style="padding: 0.8rem; border-radius: 8px; margin-bottom: 1rem; font-weight: 900;" class="${status.class}">
-                    STATUS: ${status.label.toUpperCase()}
-                </div>
-                <p><strong>Storage Zone:</strong> ${zone.toUpperCase()}</p>
-                <p><strong>Best Before / Use By:</strong> ${item.expiry}</p>
-            `;
-            document.getElementById('inspector-modal').classList.remove('hidden');
-        }
+        function renderMultidex() {
+            const proteinFlt = document.getElementById('flt-protein').value;
+            const cookwareFlt = document.getElementById('flt-cookware').value;
+            const storeFlt = document.getElementById('flt-store').value;
+            const maxTimeFlt = parseInt(document.getElementById('flt-time').value) || 999;
+            const sortFlt = document.getElementById('flt-sort').value;
+            const stockFlt = document.getElementById('flt-stock').value;
+            const grid = document.getElementById('multidex-grid');
 
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
+            const stockNames = digitalTwin.map(i => i.name.toLowerCase());
 
-        function renderInventory() {
-            ['fridge', 'pantry', 'spice'].forEach(zone => {
-                ['top', 'bottom'].forEach(shelf => {
-                    const shelfElem = document.getElementById(`shelf-${zone}-${shelf}`);
-                    const items = appState.inventory[zone][shelf];
+            // Process inventory availability
+            let processed = recipes.map(r => {
+                const have = [];
+                const buy = [];
 
-                    shelfElem.innerHTML = items.length 
-                        ? items.map(i => {
-                            const status = getExpiryStatus(i.expiry);
-                            const isSpice = zone === 'spice';
-                            const spiceColor = getSpiceColor(i.name);
-
-                            return `
-                                <div class="food-pill ${status.class}" onclick="inspectItem(${JSON.stringify(i).replace(/"/g, '&quot;')}, '${zone}')">
-                                    <div class="remove-btn" onclick="removeItem('${zone}', '${shelf}', '${i.id}', event)" title="Throw Out Item">✖</div>
-                                    ${isSpice ? `
-                                        <div class="spice-jar-container">
-                                            <div class="spice-lid"></div>
-                                            <div class="spice-label-strip">${i.displayName}</div>
-                                            <div class="spice-fill" style="background: ${spiceColor};"></div>
-                                        </div>
-                                    ` : (i.img ? `<img src="${i.img}" class="product-img" alt="${i.displayName}" />` : '')}
-                                    <span>${i.displayName}</span>
-                                    <span class="expiry-tag">${status.label}</span>
-                                </div>`;
-                        }).join('') 
-                        : `<span class="empty-label">Empty</span>`;
+                r.ingredients.forEach(ing => {
+                    if (stockNames.some(s => s.includes(ing.name.toLowerCase()) || ing.name.toLowerCase().includes(s))) {
+                        have.push(ing.name);
+                    } else {
+                        buy.push(ing.name);
+                    }
                 });
+
+                return { ...r, have: have, buy: buy };
             });
+
+            // Filter logic
+            let filtered = processed.filter(r => {
+                const matchesMap = (currentMapFilter === 'All' || r.origin.toLowerCase().includes(currentMapFilter.toLowerCase()));
+                const matchesProtein = (proteinFlt === 'All' || r.proteinTag === proteinFlt);
+                const matchesCookware = (cookwareFlt === 'All' || r.cookware === cookwareFlt);
+                const matchesStore = (storeFlt === 'All' || r.tier === storeFlt);
+                const matchesTime = (r.prepTime + r.cookTime) <= maxTimeFlt;
+                const matchesStock = (stockFlt === 'All' || r.buy.length === 0);
+
+                return matchesMap && matchesProtein && matchesCookware && matchesStore && matchesTime && matchesStock;
+            });
+
+            // Sorting logic
+            if (sortFlt === 'cals-asc') filtered.sort((a,b) => a.cals - b.cals);
+            if (sortFlt === 'cals-desc') filtered.sort((a,b) => b.cals - a.cals);
+            if (sortFlt === 'prot-desc') filtered.sort((a,b) => b.proteinG - a.proteinG);
+            if (sortFlt === 'cost-asc') filtered.sort((a,b) => a.costPerServ - b.costPerServ);
+
+            grid.innerHTML = filtered.map(r => {
+                const scale = r.currentServings || 1;
+                const totalCals = r.cals * scale;
+                const totalProt = r.proteinG * scale;
+                const totalCost = (r.costPerServ * scale).toFixed(2);
+
+                const statusBadge = r.buy.length === 0
+                    ? '<span class="ingredient-status status-have">100% In Stock</span>'
+                    : '<span class="ingredient-status status-buy">Missing: ' + r.buy.length + ' Items</span>';
+
+                const ingListHtml = r.ingredients.map(ing => {
+                    const scaledAmt = ing.amount * scale;
+                    return scaledAmt + ing.unit + ' ' + ing.name;
+                }).join(', ');
+
+                return '<div class="recipe-card">' +
+                    '<div>' +
+                        '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">' +
+                            '<h3 style="font-weight: 700;">' + r.title + '</h3>' +
+                            statusBadge +
+                        '</div>' +
+                        '<div style="display:flex; gap:0.4rem; margin-bottom:0.6rem; flex-wrap:wrap;">' +
+                            '<span class="tag-pill">📍 ' + r.origin + '</span>' +
+                            '<span class="tag-pill">🍗 ' + r.proteinTag + '</span>' +
+                            '<span class="tag-pill">🍳 ' + r.cookware + '</span>' +
+                        '</div>' +
+                        
+                        '<div style="display:flex; justify-content:space-between; align-items:center; margin:0.8rem 0; background:#f8fafc; padding:0.5rem; border-radius:6px;">' +
+                            '<div class="portion-scaler">' +
+                                '<span>Servings:</span>' +
+                                '<button class="portion-btn" onclick="updateServings(' + r.id + ', -1)">-</button>' +
+                                '<span style="font-weight:700;">' + scale + '</span>' +
+                                '<button class="portion-btn" onclick="updateServings(' + r.id + ', 1)">+</button>' +
+                            '</div>' +
+                            '<div style="font-weight:700; color:var(--primary); font-size:0.9rem;">£' + totalCost + ' total</div>' +
+                        '</div>' +
+
+                        '<div style="font-size:0.85rem; margin:0.6rem 0;">' +
+                            '<div><strong>Nutrition:</strong> ' + totalCals + ' kcal | ' + totalProt + 'g Protein</div>' +
+                            '<div><strong>Speed:</strong> Prep ' + r.prepTime + 'm | Cook ' + r.cookTime + 'm (' + (r.prepTime+r.cookTime) + 'm total)</div>' +
+                            '<div style="margin-top:0.4rem;"><strong>Scaled Ingredients:</strong> ' + ingListHtml + '</div>' +
+                        '</div>' +
+
+                        '<div class="storage-box">' +
+                            '<strong>📦 Storage:</strong> ' + r.storage +
+                        '</div>' +
+
+                        '<div style="font-size:0.85rem; margin-top:0.8rem;">' +
+                            '<div style="color:var(--success);"><strong>In Stock:</strong> ' + (r.have.join(', ') || 'None') + '</div>' +
+                            '<div style="color:var(--danger); margin-top:0.2rem;"><strong>Need to Buy:</strong> ' + (r.buy.join(', ') || 'None! Ready to cook.') + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="supermarket-badge">' +
+                        '<span>Tier: ' + r.tier + ' Supermarket</span>' +
+                        '<span>£' + r.costPerServ.toFixed(2) + ' / serving</span>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
         }
 
-        function toggleView() { navigateTo(appState.currentView === 'fridge' ? 'planner' : 'fridge'); }
-
-        function navigateTo(targetView) {
-            appState.currentView = targetView;
-            const fridgePanel = document.getElementById('fridge-view-panel');
-            const plannerPanel = document.getElementById('planner-view-panel');
-            const toggleBtn = document.getElementById('view-toggle-btn');
-
-            if (targetView === 'planner') {
-                fridgePanel.classList.add('hidden');
-                plannerPanel.classList.remove('hidden');
-                toggleBtn.innerText = "Switch to Workspace";
-                resetWizard();
-            } else {
-                plannerPanel.classList.add('hidden');
-                fridgePanel.classList.remove('hidden');
-                toggleBtn.innerText = "Switch to Planner";
-                renderInventory();
-            }
-        }
-
-        document.getElementById('expiry-input').value = new Date().toISOString().split('T')[0];
-        renderInventory();
+        renderTracker();
+        renderDigitalTwin();
     </script>
 </body>
 </html>
