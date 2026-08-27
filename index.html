@@ -3,1426 +3,784 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>What's For Dinner - Integrated Kitchen Codex</title>
-    <style>
-        :root {
-            --book-spine: #0f172a;
-            --page-bg: #ffffff;
-            --page-border: #e2e8f0;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --primary: #0066EE;
-            --primary-hover: #0052c2;
-            --success: #16a34a;
-            --success-bg: #dcfce7;
-            --danger: #ef4444;
-            --danger-bg: #fee2e2;
-            --warning: #f59e0b;
-            --warning-bg: #fef3c7;
-            --chip-bg: #f8fafc;
+    <title>What's for Dinner? - Kitchen & Fitness Codex</title>
+    
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='white'/><path d='M32 20v25c0 5 4 9 9 9v26h6V54c5 0 9-4 9-9V20h-5v22h-4V20h-5v22h-4V20h-6zm36 0c-8 0-14 10-14 25v9h8v26h6V20h-0z' fill='black'/></svg>">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        purple: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            600: '#7c3aed',
+                            700: '#6d28d9',
+                            800: '#5b21b6',
+                            900: '#4c1d95',
+                        }
+                    }
+                }
+            }
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        body {
-            background-color: #090d16;
-            background-image: radial-gradient(#1e293b 1px, transparent 1px);
-            background-size: 24px 24px;
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 1.5rem;
-        }
-
-        .book-container {
-            width: 100%;
-            max-width: 1400px;
-            background: var(--book-spine);
-            border-radius: 16px;
-            padding: 20px 20px 20px 0;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
-            display: flex;
-            position: relative;
-            min-height: 850px;
-        }
-
-        .book-tabs {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            padding-top: 2.5rem;
-            width: 200px;
-            z-index: 10;
-        }
-
-        .tab-btn {
-            background: #1e293b;
-            color: #94a3b8;
-            border: none;
-            padding: 0.9rem 1.2rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-            cursor: pointer;
-            text-align: left;
-            border-radius: 10px 0 0 10px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            border-left: 4px solid transparent;
-        }
-
-        .tab-btn:hover {
-            background: #334155;
-            color: #f8fafc;
-            padding-left: 1.3rem;
-        }
-
-        .tab-btn.active {
-            background: var(--page-bg);
-            color: var(--primary);
-            font-weight: 700;
-            border-left: 4px solid var(--primary);
-            box-shadow: -6px 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .book-page {
-            flex: 1;
-            background: var(--page-bg);
-            border-radius: 8px;
-            padding: 2.5rem;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.02);
-            border: 1px solid var(--page-border);
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            max-height: 850px;
-        }
-
-        .brand-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--page-border);
-            padding-bottom: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .brand-title {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--book-spine);
-            letter-spacing: -0.02em;
-            cursor: pointer;
-        }
-
-        .brand-title span { color: var(--primary); }
-
-        .page-view { display: none; }
-        .page-view.active { display: block; }
-
-        .card {
-            background: #ffffff;
-            border: 1px solid var(--page-border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-        }
-
-        .card-title {
-            font-size: 1rem;
-            font-weight: 700;
-            letter-spacing: -0.01em;
-            color: var(--book-spine);
-            margin-bottom: 1rem;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 1rem;
-        }
-
-        .form-group { margin-bottom: 1rem; }
-        
-        label {
-            display: block;
-            font-size: 0.725rem;
-            font-weight: 700;
-            letter-spacing: 0.03em;
-            margin-bottom: 0.4rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-
-        input, select {
-            width: 100%;
-            padding: 0.7rem 0.85rem;
-            border: 1px solid var(--page-border);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            color: var(--text-main);
-            background: #fff;
-            transition: border-color 0.15s ease;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0,102,238,0.1);
-        }
-
-        button.btn-primary {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.4rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            letter-spacing: -0.01em;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.15s ease, transform 0.1s ease;
-        }
-        button.btn-primary:hover { 
-            background: var(--primary-hover); 
-        }
-        button.btn-primary:active {
-            transform: scale(0.98);
-        }
-
-        .summary-dashboard {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            background: #f8fafc;
-            border: 1px solid var(--page-border);
-            border-radius: 10px;
-            padding: 1.25rem;
-            text-align: center;
-        }
-
-        .metric-val {
-            font-size: 1.6rem;
-            font-weight: 800;
-            letter-spacing: -0.02em;
-            color: var(--primary);
-            margin: 0.2rem 0;
-        }
-
-        .metric-sub {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .wizard-card {
-            max-width: 600px;
-            margin: 1rem auto;
-            text-align: center;
-        }
-        .wizard-step { display: none; }
-        .wizard-step.active { display: block; }
-        
-        .wizard-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .opt-btn {
-            background: #ffffff;
-            border: 1px solid var(--page-border);
-            padding: 1.25rem 1rem;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.15s ease;
-            color: var(--text-main);
-            font-size: 0.95rem;
-        }
-        .opt-btn:hover {
-            border-color: var(--primary);
-            background: #f4f8ff;
-            color: var(--primary);
-        }
-        .opt-btn:active {
-            transform: scale(0.98);
-        }
-
-        /* DIGITAL TWIN STYLES */
-        .twin-containers-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 1.5rem;
-            perspective: 1000px;
-        }
-
-        .door-appliance {
-            background: #cbd5e1;
-            border: 4px solid #94a3b8;
-            border-radius: 12px;
-            height: 480px;
-            position: relative;
-            box-shadow: inset 0 0 15px rgba(0,0,0,0.1);
-        }
-
-        .appliance-interior {
-            padding: 1rem;
-            height: 100%;
-            background: #f1f5f9;
-            overflow-y: auto;
-            border-radius: 8px;
-        }
-
-        .appliance-door {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 100%);
-            border: 2px solid #94a3b8;
-            border-radius: 8px;
-            z-index: 5;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-origin: left center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: 5px 0 15px rgba(0,0,0,0.15);
-        }
-
-        .door-handle {
-            width: 12px;
-            height: 80px;
-            background: #475569;
-            border-radius: 6px;
-            position: absolute;
-            right: 20px;
-            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
-        }
-
-        .door-appliance.open .appliance-door {
-            transform: rotateY(-105deg);
-        }
-
-        .inventory-card {
-            background: white;
-            border: 1px solid var(--page-border);
-            border-radius: 8px;
-            padding: 0.75rem;
-            margin-bottom: 0.6rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-            display: flex;
-            flex-direction: column;
-            gap: 0.3rem;
-            position: relative;
-        }
-
-        .inventory-card.warning-exp {
-            border-left: 4px solid var(--warning);
-            background: #fffdf5;
-        }
-
-        .inventory-card.danger-exp {
-            border-left: 4px solid var(--danger);
-            background: #fef8f8;
-        }
-
-        .inventory-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 700;
-            font-size: 0.9rem;
-        }
-
-        .inventory-card-meta {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            display: flex;
-            gap: 0.8rem;
-            flex-wrap: wrap;
-        }
-
-        .badge-status {
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 0.15rem 0.4rem;
-            border-radius: 4px;
-            text-transform: uppercase;
-        }
-        .badge-fresh { background: var(--success-bg); color: var(--success); }
-        .badge-soon { background: var(--warning-bg); color: var(--warning); }
-        .badge-expired { background: var(--danger-bg); color: var(--danger); }
-
-        .btn-del {
-            background: none;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            font-size: 0.9rem;
-            position: absolute;
-            top: 0.6rem;
-            right: 0.6rem;
-        }
-        .btn-del:hover { color: var(--danger); }
-
-        /* RECIPE MATRIX & MAP STYLES */
-        .world-map-container {
-            background: #0f172a;
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            color: white;
-        }
-
-        .map-nodes-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.6rem;
-            margin-top: 0.8rem;
-        }
-
-        .map-node-btn {
-            background: #1e293b;
-            color: #94a3b8;
-            border: 1px solid #334155;
-            padding: 0.5rem 0.9rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-        .map-node-btn:hover, .map-node-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .multidex-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .recipe-card {
-            background: white;
-            border: 1px solid var(--page-border);
-            border-top: 4px solid var(--primary);
-            border-radius: 10px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .ingredient-status {
-            font-size: 0.75rem;
-            padding: 0.25rem 0.55rem;
-            border-radius: 4px;
-            font-weight: 700;
-            display: inline-block;
-        }
-        .status-have { background: var(--success-bg); color: var(--success); }
-        .status-buy { background: var(--danger-bg); color: var(--danger); }
-
-        .tag-pill {
-            background: #f1f5f9;
-            font-size: 0.725rem;
-            font-weight: 600;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            color: var(--text-muted);
-        }
-
-        .supermarket-badge {
-            font-size: 0.8rem;
-            font-weight: 600;
-            background: #f8fafc;
-            border: 1px solid var(--page-border);
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
-            margin-top: 1rem;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .portion-scaler {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: #f1f5f9;
-            padding: 0.3rem 0.6rem;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        .portion-btn {
-            background: white;
-            border: 1px solid var(--page-border);
-            border-radius: 4px;
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .storage-box {
-            background: #f8fafc;
-            border: 1px dashed var(--page-border);
-            border-radius: 6px;
-            padding: 0.6rem;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-top: 0.8rem;
-        }
-
-        .meal-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 0.5rem;
-        }
-        .meal-table th, .meal-table td {
-            padding: 0.75rem;
-            border-bottom: 1px solid var(--page-border);
-            text-align: left;
-        }
-        .meal-table th { background: #f8fafc; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
-        .meal-cat-row { background: #f1f5f9; font-weight: 700; color: var(--book-spine); }
-    </style>
+    </script>
 </head>
-<body>
+<body class="bg-gray-50 text-gray-900 font-sans antialiased min-h-screen flex flex-col">
 
-    <div class="book-container">
-        <div class="book-tabs">
-            <button id="tab-tracker" class="tab-btn active" onclick="switchTab('tracker-view')">
-                📊 Daily Tracker
-            </button>
-            <button id="tab-survey" class="tab-btn" onclick="switchTab('survey-view')">
-                📜 Macro Wizard
-            </button>
-            <button id="tab-twin" class="tab-btn" onclick="switchTab('twin-view')">
-                🧊 Digital Twin
-            </button>
-            <button id="tab-multidex" class="tab-btn" onclick="switchTab('multidex-view')">
-                📖 Global Synthesizer
-            </button>
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="handleLogoClick()">
+                <svg class="w-8 h-8 rounded border border-gray-200 p-1 bg-white hover:border-purple-400 transition" viewBox="0 0 100 100">
+                    <rect width="100" height="100" fill="white"/>
+                    <path d="M32 20v25c0 5 4 9 9 9v26h6V54c5 0 9-4 9-9V20h-5v22h-4V20h-5v22h-4V20h-6zm36 0c-8 0-14 10-14 25v9h8v26h6V20h-0z" fill="black"/>
+                </svg>
+                <span class="font-bold text-xl tracking-tight text-gray-900">What's for Dinner?</span>
+            </div>
+            
+            <nav class="flex gap-1 sm:gap-3">
+                <button onclick="navigateTo('home')" class="nav-btn text-sm font-medium px-3 py-2 rounded-md hover:bg-purple-50 hover:text-purple-700 text-purple-700 font-semibold" data-target="home">Home</button>
+                <button onclick="navigateTo('recipes')" class="nav-btn text-sm font-medium px-3 py-2 rounded-md hover:bg-purple-50 hover:text-purple-700 text-gray-600" data-target="recipes">Recipe Database</button>
+                <button onclick="navigateTo('inventory')" class="nav-btn text-sm font-medium px-3 py-2 rounded-md hover:bg-purple-50 hover:text-purple-700 text-gray-600" data-target="inventory">Digital Twin</button>
+                <button onclick="navigateTo('fitness')" class="nav-btn text-sm font-medium px-3 py-2 rounded-md hover:bg-purple-50 hover:text-purple-700 text-gray-600" data-target="fitness">Fitness Diary</button>
+            </nav>
         </div>
+    </header>
 
-        <div class="book-page">
-            <div class="brand-header">
-                <div class="brand-title" onclick="resetToHome()">What's For <span>Dinner</span></div>
-                <div style="font-weight:600; font-size: 0.85rem; color: var(--text-muted);" id="live-macro-indicator">
-                    Daily Goal: 2,200 kcal | P: 140g
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <section id="view-home" class="view-panel">
+            <div class="text-center py-6">
+                <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight sm:text-5xl mb-3">What's for Dinner?</h1>
+                <p class="text-base text-gray-600 max-w-2xl mx-auto mb-8">
+                    Your integrated meal planner, AI-labeled recipe database, digital twin inventory, and fitness diary.
+                </p>
+                
+                <div class="bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white rounded-2xl p-8 max-w-xl mx-auto shadow-xl text-left relative overflow-hidden mb-10">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs uppercase font-bold tracking-wider text-purple-300">Suggested Dinner Tonight</span>
+                        <span class="bg-purple-700/60 text-purple-200 text-xs px-2.5 py-0.5 rounded-full border border-purple-500/30">Matches Your Exercise Target</span>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-2">Sheet-Pan Chicken Teriyaki & Broccoli</h2>
+                    <p class="text-purple-200 text-sm mb-6">High-protein Asian dinner with fresh greens and rice. Matches your exercise target!</p>
+                    <div class="flex flex-wrap gap-2 mb-6">
+                        <span class="bg-purple-950/60 text-purple-200 text-xs px-3 py-1 rounded-full font-medium border border-purple-700/50">25 mins</span>
+                        <span class="bg-purple-950/60 text-purple-200 text-xs px-3 py-1 rounded-full font-medium border border-purple-700/50">580 kcal</span>
+                        <span class="bg-emerald-500 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">AI Verified</span>
+                    </div>
+                    <button onclick="navigateTo('recipes')" class="w-full bg-white text-purple-900 hover:bg-purple-50 font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg text-center">
+                        Open Recipe Database
+                    </button>
+                </div>
+
+                <div class="bg-white border border-purple-100 rounded-2xl p-6 shadow-sm max-w-4xl mx-auto text-left mb-8">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-gray-100 gap-2">
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900">Today's Daily Energy & Macro Summary</h3>
+                            <p class="text-xs text-gray-500">Live stats aggregated from logged intake and fitness activity</p>
+                        </div>
+                        <button onclick="navigateTo('fitness')" class="text-xs bg-purple-100 hover:bg-purple-200 text-purple-800 font-semibold px-4 py-2 rounded-lg transition flex items-center gap-1">
+                            Fitness Diary & Sync &rarr;
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
+                        <div class="bg-purple-50/60 p-4 rounded-xl border border-purple-100">
+                            <span class="text-xs font-semibold text-purple-600 uppercase tracking-wider">Calories Consumed</span>
+                            <div class="text-2xl font-black text-purple-900 mt-1" id="sum-eaten">1,450 <span class="text-xs font-normal text-gray-500">/ 2,200 kcal</span></div>
+                            <div class="w-full bg-purple-200 h-1.5 rounded-full mt-2 overflow-hidden">
+                                <div class="bg-purple-600 h-1.5 rounded-full" style="width: 66%"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-emerald-50/60 p-4 rounded-xl border border-emerald-100">
+                            <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Calories Burned</span>
+                            <div class="text-2xl font-black text-emerald-900 mt-1" id="sum-burned">480 <span class="text-xs font-normal text-gray-500">kcal</span></div>
+                            <div class="w-full bg-emerald-200 h-1.5 rounded-full mt-2 overflow-hidden">
+                                <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 80%"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-purple-50/60 p-4 rounded-xl border border-purple-100">
+                            <span class="text-xs font-semibold text-purple-600 uppercase tracking-wider">Protein Intake</span>
+                            <div class="text-2xl font-black text-purple-900 mt-1" id="sum-protein">98g <span class="text-xs font-normal text-gray-500">/ 140g</span></div>
+                            <div class="w-full bg-purple-200 h-1.5 rounded-full mt-2 overflow-hidden">
+                                <div class="bg-purple-600 h-1.5 rounded-full" style="width: 70%"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-blue-50/60 p-4 rounded-xl border border-blue-100">
+                            <span class="text-xs font-semibold text-blue-600 uppercase tracking-wider">Net Energy Balance</span>
+                            <div class="text-2xl font-black text-blue-900 mt-1" id="sum-net">970 <span class="text-xs font-normal text-gray-500">kcal remaining</span></div>
+                            <div class="w-full bg-blue-200 h-1.5 rounded-full mt-2 overflow-hidden">
+                                <div class="bg-blue-500 h-1.5 rounded-full" style="width: 55%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                    <div onclick="navigateTo('recipes')" class="p-6 bg-white border border-gray-200 rounded-2xl hover:border-purple-300 hover:shadow-md cursor-pointer transition text-left group">
+                        <div class="w-10 h-10 bg-purple-100 text-purple-700 rounded-xl flex items-center justify-center font-bold mb-3 group-hover:bg-purple-600 group-hover:text-white transition">📖</div>
+                        <h3 class="font-bold text-gray-900 text-lg mb-1 group-hover:text-purple-700 transition">Recipe Database</h3>
+                        <p class="text-xs text-gray-500">Structured recipe cards, portion scaling, inventory matching, and vertical filter tabs.</p>
+                    </div>
+
+                    <div onclick="navigateTo('inventory')" class="p-6 bg-white border border-gray-200 rounded-2xl hover:border-purple-300 hover:shadow-md cursor-pointer transition text-left group">
+                        <div class="w-10 h-10 bg-purple-100 text-purple-700 rounded-xl flex items-center justify-center font-bold mb-3 group-hover:bg-purple-600 group-hover:text-white transition">🧊</div>
+                        <h3 class="font-bold text-gray-900 text-lg mb-1 group-hover:text-purple-700 transition">Digital Twin Inventory</h3>
+                        <p class="text-xs text-gray-500">Monitor fridge, cupboard, and spice rack items with live expiration tracking to prevent waste.</p>
+                    </div>
+
+                    <div onclick="navigateTo('fitness')" class="p-6 bg-white border border-gray-200 rounded-2xl hover:border-purple-300 hover:shadow-md cursor-pointer transition text-left group">
+                        <div class="w-10 h-10 bg-purple-100 text-purple-700 rounded-xl flex items-center justify-center font-bold mb-3 group-hover:bg-purple-600 group-hover:text-white transition">🏃</div>
+                        <h3 class="font-bold text-gray-900 text-lg mb-1 group-hover:text-purple-700 transition">Fitness Diary</h3>
+                        <p class="text-xs text-gray-500">Log meals & exercise, sync Strava/Garmin, and review historical macro calendars.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-recipes" class="view-panel hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Recipe Database</h1>
+                    <p class="text-gray-500 text-sm">Centralized repository with dynamic portion scaling and inventory integration</p>
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <input type="text" id="recipe-search" onkeyup="renderRecipes()" placeholder="Search recipes, ingredients..." class="w-full sm:w-64 border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                    <button onclick="triggerAiLabeling()" class="bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-purple-700 transition shadow-sm whitespace-nowrap">
+                        + Ingest & AI Label
+                    </button>
                 </div>
             </div>
 
-            <!-- 1. DAILY TRACKER (LANDING PAGE & DASHBOARD) -->
-            <section id="tracker-view" class="page-view active">
-                <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                        <div class="card-title" style="margin:0;">Daily Diary</div>
-                        <div style="display:flex; align-items:center; gap:0.5rem;">
-                            <label style="margin:0;">Date:</label>
-                            <input type="date" id="tracker-date" style="width:160px;" onchange="renderTracker()">
-                        </div>
-                    </div>
-
-                    <div class="summary-dashboard">
-                        <div>
-                            <label>Calories Logged</label>
-                            <div class="metric-val" id="dash-cals">0</div>
-                            <div class="metric-sub" id="sub-target-cals">/ 2,200 kcal Goal</div>
-                        </div>
-                        <div>
-                            <label>Protein</label>
-                            <div class="metric-val" id="dash-protein">0g</div>
-                            <div class="metric-sub" id="sub-target-prot">/ 140g Goal</div>
-                        </div>
-                        <div>
-                            <label>Exercise Burned</label>
-                            <div class="metric-val" style="color: var(--success);" id="dash-burned">0</div>
-                            <div class="metric-sub">kcal burned</div>
-                        </div>
-                        <div>
-                            <label>Logged Weight</label>
-                            <div class="metric-val" style="color: var(--book-spine);" id="dash-weight">75.0</div>
-                            <div class="metric-sub">kg</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-title">Log Food Entry</div>
-                    <form onsubmit="logMealEntry(event)">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>Meal Type</label>
-                                <select id="log-meal-cat">
-                                    <option value="Breakfast">Breakfast</option>
-                                    <option value="Lunch">Lunch</option>
-                                    <option value="Dinner">Dinner</option>
-                                    <option value="Snacks">Snacks</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Food Description</label>
-                                <input type="text" id="log-food-name" placeholder="e.g. Chicken & Rice" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Calories (kcal)</label>
-                                <input type="number" id="log-food-cals" placeholder="650" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Protein (g)</label>
-                                <input type="number" id="log-food-prot" placeholder="45" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-primary">Add Entry to Diary</button>
-                    </form>
-
-                    <table class="meal-table">
-                        <thead>
-                            <tr>
-                                <th>Meal / Food Item</th>
-                                <th>Calories</th>
-                                <th>Protein</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tracker-tbody"></tbody>
-                    </table>
-                </div>
-
-                <div class="form-grid">
-                    <div class="card">
-                        <div class="card-title">Log Exercise</div>
-                        <form onsubmit="logExercise(event)">
-                            <div class="form-group">
-                                <label>Activity</label>
-                                <input type="text" id="log-ex-name" placeholder="e.g. Evening Run" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Burned Calories</label>
-                                <input type="number" id="log-ex-cals" placeholder="300" required>
-                            </div>
-                            <button type="submit" class="btn-primary">Log Exercise</button>
-                        </form>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-title">Log Weight</div>
-                        <form onsubmit="logWeight(event)">
-                            <div class="form-group">
-                                <label>Today's Weight (kg)</label>
-                                <input type="number" id="log-weight-val" step="0.1" placeholder="74.5" required>
-                            </div>
-                            <button type="submit" class="btn-primary">Update Weight</button>
-                        </form>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 2. MACRO QUESTIONNAIRE WIZARD -->
-            <section id="survey-view" class="page-view">
-                <div class="card wizard-card">
+            <div class="flex flex-col md:flex-row gap-6">
+                <aside class="w-full md:w-64 bg-white border border-gray-200 rounded-2xl p-4 shrink-0 shadow-sm h-fit space-y-4">
+                    <h3 class="font-bold text-sm text-purple-900 border-b border-gray-100 pb-2">Filter & Sort Recipes</h3>
                     
-                    <div id="wiz-step-1" class="wizard-step active">
-                        <h2 style="color:var(--book-spine); font-weight: 700;">Step 1: Select Biological Sex</h2>
-                        <div class="wizard-options">
-                            <button class="opt-btn" onclick="answerWiz('sex', 'male', 2)">♂ Male</button>
-                            <button class="opt-btn" onclick="answerWiz('sex', 'female', 2)">♀ Female</button>
-                        </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Protein / Category</label>
+                        <select id="flt-protein" onchange="renderRecipes()" class="w-full border-gray-300 border rounded-lg p-2 text-xs focus:ring-purple-500 focus:border-purple-500 bg-white">
+                            <option value="All">All Proteins</option>
+                            <option value="Chicken">Chicken</option>
+                            <option value="Seafood">Seafood</option>
+                            <option value="Vegetarian">Vegetarian</option>
+                            <option value="Beef">Beef</option>
+                        </select>
                     </div>
 
-                    <div id="wiz-step-2" class="wizard-step">
-                        <h2 style="color:var(--book-spine); font-weight: 700;">Step 2: Enter Body Metrics</h2>
-                        <div style="margin-top: 1.5rem; text-align: left;">
-                            <div class="form-group">
-                                <label>Weight (kg)</label>
-                                <input type="number" id="wiz-weight" value="75">
-                            </div>
-                            <div class="form-group">
-                                <label>Height (cm)</label>
-                                <input type="number" id="wiz-height" value="175">
-                            </div>
-                            <div class="form-group">
-                                <label>Age (years)</label>
-                                <input type="number" id="wiz-age" value="28">
-                            </div>
-                            <button class="btn-primary" onclick="nextWizStep(3)" style="width:100%;">Continue to Goals</button>
-                        </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Cookware / Wash-Up</label>
+                        <select id="flt-cookware" onchange="renderRecipes()" class="w-full border-gray-300 border rounded-lg p-2 text-xs focus:ring-purple-500 focus:border-purple-500 bg-white">
+                            <option value="All">All Cookware</option>
+                            <option value="One Pot">One Pot (Zero Wash-up)</option>
+                            <option value="Sheet Pan">Sheet Pan</option>
+                            <option value="Skillet">Skillet</option>
+                        </select>
                     </div>
 
-                    <div id="wiz-step-3" class="wizard-step">
-                        <h2 style="color:var(--book-spine); font-weight: 700;">Step 3: Choose Goal</h2>
-                        <div class="wizard-options">
-                            <button class="opt-btn" onclick="answerWiz('goal', 'cut', 4)">Fat Loss (-15%)</button>
-                            <button class="opt-btn" onclick="answerWiz('goal', 'maintain', 4)">Maintenance</button>
-                            <button class="opt-btn" onclick="answerWiz('goal', 'bulk', 4)">Muscle Gain (+10%)</button>
-                        </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Supermarket Tier</label>
+                        <select id="flt-tier" onchange="renderRecipes()" class="w-full border-gray-300 border rounded-lg p-2 text-xs focus:ring-purple-500 focus:border-purple-500 bg-white">
+                            <option value="All">All Tiers</option>
+                            <option value="Budget">Budget (Aldi/Lidl)</option>
+                            <option value="Standard">Standard (Tesco/Sainsbury's)</option>
+                            <option value="Premium">Premium (Waitrose/M&S)</option>
+                        </select>
                     </div>
 
-                    <div id="wiz-step-4" class="wizard-step">
-                        <h2 style="color:var(--book-spine); font-weight: 700;">Your Recommended Plan</h2>
-                        <div style="background:#f8fafc; padding:1rem; border-radius:8px; margin:1rem 0; border: 1px solid var(--page-border);" id="wiz-macro-summary"></div>
-                        <div id="wiz-suggested-meal" class="card" style="text-align:left; border-color:var(--primary);"></div>
-                        <button class="btn-primary" onclick="resetWiz()">Retake Questionnaire</button>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Max Prep/Cook Time</label>
+                        <select id="flt-time" onchange="renderRecipes()" class="w-full border-gray-300 border rounded-lg p-2 text-xs focus:ring-purple-500 focus:border-purple-500 bg-white">
+                            <option value="Any">Any Speed</option>
+                            <option value="15">Under 15 mins</option>
+                            <option value="30">Under 30 mins</option>
+                        </select>
                     </div>
 
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Inventory Match</label>
+                        <select id="flt-inventory" onchange="renderRecipes()" class="w-full border-gray-300 border rounded-lg p-2 text-xs focus:ring-purple-500 focus:border-purple-500 bg-white">
+                            <option value="All">All Recipes</option>
+                            <option value="100">100% In Stock</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Sort By</label>
+                        <select id="flt-sort" onchange="renderRecipes()" class="w-full border-gray-300 border rounded-lg p-2 text-xs focus:ring-purple-500 focus:border-purple-500 bg-white">
+                            <option value="Default">Default Match</option>
+                            <option value="CalLow">Calories (Low to High)</option>
+                            <option value="CalHigh">Calories (High to Low)</option>
+                            <option value="ProteinHigh">Protein (High to Low)</option>
+                            <option value="CostLow">Cost (Cheapest First)</option>
+                        </select>
+                    </div>
+                </aside>
+
+                <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6" id="recipe-cards-container">
+                    </div>
+            </div>
+        </section>
+
+        <section id="view-inventory" class="view-panel hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Digital Twin Inventory</h1>
+                    <p class="text-gray-500 text-sm">Real-time waste reduction engine tracking fridge, pantry, and spice expiration dates</p>
                 </div>
-            </section>
+                <div class="flex gap-2">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800" id="badge-expiring-count">
+                        0 Expiring Soon
+                    </span>
+                </div>
+            </div>
 
-            <!-- 3. DIGITAL TWIN (WASTE REDUCTION ENGINE) -->
-            <section id="twin-view" class="page-view">
-                <div class="card">
-                    <div class="card-title">Stock Your Digital Twin & Track Expirations</div>
-                    <form onsubmit="addTwinItem(event)" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:0.8rem;">
+            <div class="bg-white border border-purple-100 rounded-2xl p-5 mb-8 shadow-sm">
+                <h2 class="text-sm font-bold text-purple-900 uppercase tracking-wider mb-3">Add Inventory Item</h2>
+                <form onsubmit="addInventoryItem(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Zone</label>
+                        <select id="inv-zone" class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                            <option value="Fridge">Fridge</option>
+                            <option value="Cupboard">Cupboard</option>
+                            <option value="Spice Rack">Spice Rack</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Item Name</label>
+                        <input type="text" id="inv-name" placeholder="e.g. Broccoli" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Opened Date</label>
+                        <input type="date" id="inv-opened" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 mb-1 uppercase">Expiry Date</label>
+                        <input type="date" id="inv-expiry" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-purple-600 text-white font-semibold py-2 px-4 rounded-lg text-sm hover:bg-purple-700 transition">
+                            + Track Item
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+                        <h2 class="font-bold text-gray-900 flex items-center gap-2">
+                            <span>🧊</span> Fridge
+                        </h2>
+                        <span class="text-xs text-gray-400 font-medium" id="fridge-count">0 items</span>
+                    </div>
+                    <div id="container-fridge" class="space-y-3"></div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+                        <h2 class="font-bold text-gray-900 flex items-center gap-2">
+                            <span>🥫</span> Cupboard
+                        </h2>
+                        <span class="text-xs text-gray-400 font-medium" id="cupboard-count">0 items</span>
+                    </div>
+                    <div id="container-cupboard" class="space-y-3"></div>
+                </div>
+
+                <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+                    <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
+                        <h2 class="font-bold text-gray-900 flex items-center gap-2">
+                            <span>🌶️</span> Spice Rack
+                        </h2>
+                        <span class="text-xs text-gray-400 font-medium" id="spicerack-count">0 items</span>
+                    </div>
+                    <div id="container-spicerack" class="space-y-3"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-fitness" class="view-panel hidden">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900">Fitness Diary & Daily Logs</h1>
+                    <p class="text-gray-500 text-sm">Combined food log, exercise tracking, wearable integrations, and macro calendar</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <div class="lg:col-span-1 bg-white p-6 border border-gray-200 rounded-2xl shadow-sm space-y-4">
+                    <h2 class="text-lg font-bold text-gray-900 mb-1">Log Food & Meals</h2>
+                    <p class="text-xs text-gray-500 mb-2">Record your daily meal intakes to update caloric and macro totals.</p>
+                    <form onsubmit="handleFoodLog(event)" class="space-y-3">
                         <div>
-                            <label>Storage Zone</label>
-                            <select id="twin-zone-select" required>
-                                <option value="Fridge">Fridge</option>
-                                <option value="Cupboard">Cupboard</option>
-                                <option value="Spice Rack">Spice Rack</option>
-                            </select>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Meal / Item Name</label>
+                            <input type="text" id="food-name" placeholder="e.g. Protein Smoothie" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
                         </div>
-                        <div>
-                            <label>Item Name</label>
-                            <input type="text" id="twin-name-input" placeholder="e.g. Chicken Thighs" required>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Calories (kcal)</label>
+                                <input type="number" id="food-cals" placeholder="350" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Protein (g)</label>
+                                <input type="number" id="food-prot" placeholder="30" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                            </div>
                         </div>
-                        <div>
-                            <label>Quantity</label>
-                            <input type="text" id="twin-qty-input" placeholder="e.g. 500g" required>
-                        </div>
-                        <div>
-                            <label>Opened Date</label>
-                            <input type="date" id="twin-opened-input" required>
-                        </div>
-                        <div>
-                            <label>Use By / Expiry Date</label>
-                            <input type="date" id="twin-expiry-input" required>
-                        </div>
-                        <div style="display:flex; align-items:flex-end;">
-                            <button type="submit" class="btn-primary" style="width:100%;">Add Item</button>
-                        </div>
+                        <button type="submit" class="w-full bg-purple-600 text-white font-semibold py-2.5 px-4 rounded-xl text-sm hover:bg-purple-700 transition shadow-sm">
+                            + Add to Food Log
+                        </button>
                     </form>
                 </div>
 
-                <div class="twin-containers-grid">
-                    <div class="door-appliance" id="fridge-appliance">
-                        <div class="appliance-door" onclick="toggleDoor('fridge-appliance')">
-                            <div class="door-handle"></div>
-                            <h2 style="color:#334155; font-weight: 700;">Fridge</h2>
-                            <p style="font-size:0.8rem; color:#64748b; margin-top:0.4rem;">Click handle to open/close</p>
+                <div class="lg:col-span-1 bg-white p-6 border border-gray-200 rounded-2xl shadow-sm space-y-4">
+                    <h2 class="text-lg font-bold text-gray-900 mb-1">Log Exercise</h2>
+                    <p class="text-xs text-gray-500 mb-2">Manually record workouts to calculate total energy burn.</p>
+                    <form onsubmit="handleManualLog(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Activity Type</label>
+                            <select id="ex-type" class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                                <option value="Running">Running</option>
+                                <option value="Cycling">Cycling</option>
+                                <option value="Swimming">Swimming</option>
+                                <option value="Strength Training">Strength Training</option>
+                                <option value="HIIT Workout">HIIT Workout</option>
+                            </select>
                         </div>
-                        <div class="appliance-interior">
-                            <h4 style="margin-bottom:0.75rem; color:var(--book-spine); font-weight: 700;">Fridge Stock</h4>
-                            <div id="items-fridge"></div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Duration (m)</label>
+                                <input type="number" id="ex-duration" placeholder="45" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Burned (kcal)</label>
+                                <input type="number" id="ex-calories" placeholder="380" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="door-appliance" id="cupboard-appliance">
-                        <div class="appliance-door" onclick="toggleDoor('cupboard-appliance')">
-                            <div class="door-handle"></div>
-                            <h2 style="color:#334155; font-weight: 700;">Cupboard</h2>
-                            <p style="font-size:0.8rem; color:#64748b; margin-top:0.4rem;">Click handle to open/close</p>
-                        </div>
-                        <div class="appliance-interior">
-                            <h4 style="margin-bottom:0.75rem; color:var(--book-spine); font-weight: 700;">Cupboard Stock</h4>
-                            <div id="items-cupboard"></div>
-                        </div>
-                    </div>
-
-                    <div class="door-appliance" id="spicerack-appliance">
-                        <div class="appliance-door" onclick="toggleDoor('spicerack-appliance')">
-                            <div class="door-handle"></div>
-                            <h2 style="color:#334155; font-weight: 700;">Spice Rack</h2>
-                            <p style="font-size:0.8rem; color:#64748b; margin-top:0.4rem;">Click handle to open/close</p>
-                        </div>
-                        <div class="appliance-interior">
-                            <h4 style="margin-bottom:0.75rem; color:var(--book-spine); font-weight: 700;">Spice Rack Stock</h4>
-                            <div id="items-spicerack"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 4. GLOBAL AI RECIPE MULTIDEX & MATRIX -->
-            <section id="multidex-view" class="page-view">
-                
-                <!-- WORLD MAP / GEOGRAPHIC REGION FILTER -->
-                <div class="world-map-container">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h4 style="font-weight: 700;">🌐 Interactive Global Recipe Map Filter</h4>
-                        <span style="font-size:0.75rem; color:#94a3b8;">Filter by Culinary Origin</span>
-                    </div>
-                    <div class="map-nodes-grid">
-                        <button class="map-node-btn active" onclick="setMapFilter('All')">🌍 All Origins</button>
-                        <button class="map-node-btn" onclick="setMapFilter('Italy')">🇮🇹 Italy</button>
-                        <button class="map-node-btn" onclick="setMapFilter('Japan')">🇯🇵 Japan</button>
-                        <button class="map-node-btn" onclick="setMapFilter('India')">🇮🇳 India</button>
-                        <button class="map-node-btn" onclick="setMapFilter('Mexico')">🇲🇽 Mexico</button>
-                        <button class="map-node-btn" onclick="setMapFilter('Thailand')">🇹🇭 Thailand</button>
-                        <button class="map-node-btn" onclick="setMapFilter('Mediterranean')">🇬🇷 Mediterranean</button>
-                    </div>
+                        <button type="submit" class="w-full bg-emerald-600 text-white font-semibold py-2.5 px-4 rounded-xl text-sm hover:bg-emerald-700 transition shadow-sm">
+                            + Log Workout Activity
+                        </button>
+                    </form>
                 </div>
 
-                <!-- AI SYNTHESIZER & DEEP MATRIX FILTERS -->
-                <div class="card">
-                    <div class="card-title">AI Recipe Web Parser & Matrix Filters</div>
-                    <div style="display: flex; gap: 0.8rem; margin-bottom: 1.2rem;">
-                        <input type="text" id="synth-input" placeholder="Paste recipe URL or type query (e.g. 'One Pot Thai Red Curry with Chicken')">
-                        <button class="btn-primary" onclick="synthesizeRecipeLive()">AI Synthesize & Auto-Label</button>
+                <div class="lg:col-span-1 bg-white p-6 border border-gray-200 rounded-2xl shadow-sm space-y-3">
+                    <h2 class="text-lg font-bold text-gray-900 mb-1">Wearable Devices & Sync</h2>
+                    <p class="text-xs text-gray-500 mb-2">Sync real-time heart rate and activity metrics.</p>
+                    
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded-xl bg-gray-50/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-orange-500 text-white font-black rounded-lg flex items-center justify-center text-xs">ST</div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-900">Strava</p>
+                                <p class="text-[10px] text-gray-400" id="strava-status">Disconnected</p>
+                            </div>
+                        </div>
+                        <button onclick="toggleSync('strava')" class="text-xs bg-white border border-gray-300 hover:bg-purple-600 hover:text-white px-2.5 py-1 rounded-lg font-semibold transition">Sync</button>
                     </div>
 
-                    <div class="form-grid">
-                        <div>
-                            <label>Protein / Category</label>
-                            <select id="flt-protein" onchange="renderMultidex()">
-                                <option value="All">All Proteins</option>
-                                <option value="Chicken">Chicken</option>
-                                <option value="Seafood">Seafood</option>
-                                <option value="Vegetarian">Vegetarian</option>
-                                <option value="Beef">Beef</option>
-                            </select>
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded-xl bg-gray-50/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-blue-600 text-white font-black rounded-lg flex items-center justify-center text-xs">GA</div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-900">Garmin Connect</p>
+                                <p class="text-[10px] text-gray-400" id="garmin-status">Disconnected</p>
+                            </div>
                         </div>
-                        <div>
-                            <label>Cookware / Wash-Up</label>
-                            <select id="flt-cookware" onchange="renderMultidex()">
-                                <option value="All">All Cookware</option>
-                                <option value="One Pot">One Pot (Zero Wash-up)</option>
-                                <option value="Sheet Pan">Sheet Pan</option>
-                                <option value="Skillet">Skillet</option>
-                            </select>
+                        <button onclick="toggleSync('garmin')" class="text-xs bg-white border border-gray-300 hover:bg-purple-600 hover:text-white px-2.5 py-1 rounded-lg font-semibold transition">Sync</button>
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded-xl bg-gray-50/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-purple-600 text-white font-black rounded-lg flex items-center justify-center text-xs">WE</div>
+                            <div>
+                                <p class="text-xs font-bold text-gray-900">Apple / Wear OS</p>
+                                <p class="text-[10px] text-gray-400" id="wearable-status">Disconnected</p>
+                            </div>
                         </div>
-                        <div>
-                            <label>Supermarket Tier</label>
-                            <select id="flt-store" onchange="renderMultidex()">
-                                <option value="All">All Tiers</option>
-                                <option value="Budget">Budget (Aldi/Lidl)</option>
-                                <option value="Standard">Standard (Tesco/Sainsbury's)</option>
-                                <option value="Premium">Premium (Waitrose/M&S)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Max Prep/Cook Time</label>
-                            <select id="flt-time" onchange="renderMultidex()">
-                                <option value="999">Any Speed</option>
-                                <option value="15">Under 15 mins</option>
-                                <option value="30">Under 30 mins</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Sort By</label>
-                            <select id="flt-sort" onchange="renderMultidex()">
-                                <option value="default">Default Match</option>
-                                <option value="cals-asc">Calories (Low to High)</option>
-                                <option value="cals-desc">Calories (High to Low)</option>
-                                <option value="prot-desc">Protein (High to Low)</option>
-                                <option value="cost-asc">Cost (Cheapest First)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Inventory Match</label>
-                            <select id="flt-stock" onchange="renderMultidex()">
-                                <option value="All">All Recipes</option>
-                                <option value="Ready">100% In Stock</option>
-                            </select>
-                        </div>
+                        <button onclick="toggleSync('wearable')" class="text-xs bg-white border border-gray-300 hover:bg-purple-600 hover:text-white px-2.5 py-1 rounded-lg font-semibold transition">Sync</button>
                     </div>
                 </div>
+            </div>
 
-                <div class="multidex-grid" id="multidex-grid"></div>
-            </section>
+            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">Historical Macro & Activity Calendar</h2>
+                        <p class="text-xs text-gray-500">Track daily adherence across recent weeks</p>
+                    </div>
+                    <span class="text-xs bg-purple-100 text-purple-800 font-semibold px-3 py-1 rounded-full">August 2026</span>
+                </div>
 
-        </div>
-    </div>
+                <div class="grid grid-cols-7 gap-2 text-center text-xs font-semibold text-gray-400 mb-2">
+                    <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
+                </div>
+
+                <div class="grid grid-cols-7 gap-2 text-xs">
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 opacity-40">24</div>
+                    <div class="bg-purple-50 p-3 rounded-xl border border-purple-200 text-left">
+                        <div class="font-bold text-purple-900 mb-1">25</div>
+                        <div class="text-[10px] text-gray-500">In: 2,100 kcal</div>
+                        <div class="text-[10px] text-emerald-600 font-semibold">Out: 520 kcal</div>
+                    </div>
+                    <div class="bg-purple-50 p-3 rounded-xl border border-purple-200 text-left">
+                        <div class="font-bold text-purple-900 mb-1">26</div>
+                        <div class="text-[10px] text-gray-500">In: 1,950 kcal</div>
+                        <div class="text-[10px] text-emerald-600 font-semibold">Out: 340 kcal</div>
+                    </div>
+                    <div class="bg-purple-600 text-white p-3 rounded-xl text-left shadow-md">
+                        <div class="font-bold mb-1">27 (Today)</div>
+                        <div class="text-[10px] text-purple-100">In: 1,450 kcal</div>
+                        <div class="text-[10px] text-emerald-300 font-bold">Out: 480 kcal</div>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 text-left">
+                        <div class="font-bold text-gray-700 mb-1">28</div>
+                        <div class="text-[10px] text-gray-400">Planned</div>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 text-left">
+                        <div class="font-bold text-gray-700 mb-1">29</div>
+                        <div class="text-[10px] text-gray-400">Planned</div>
+                    </div>
+                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 text-left">
+                        <div class="font-bold text-gray-700 mb-1">30</div>
+                        <div class="text-[10px] text-gray-400">Planned</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
 
     <script>
-        let wizardData = { sex: 'male', weight: 75, height: 175, age: 28, goal: 'cut' };
-        let calculatedMacros = { cals: 2200, protein: 140 };
-        let currentMapFilter = 'All';
-
-        // Enhanced Digital Twin data structure with Opened & Expiry dates
-        let digitalTwin = [
-            { id: 1, zone: 'Fridge', name: 'Chicken Thighs', qty: '500g', opened: '2026-04-17', expiry: '2026-04-21' },
-            { id: 2, zone: 'Fridge', name: 'Butter', qty: '100g', opened: '2026-04-10', expiry: '2026-05-15' },
-            { id: 3, zone: 'Cupboard', name: 'Chickpeas', qty: '2 cans', opened: '2026-04-01', expiry: '2026-12-31' },
-            { id: 4, zone: 'Cupboard', name: 'Rice', qty: '1 kg', opened: '2026-03-15', expiry: '2027-01-01' },
-            { id: 5, zone: 'Spice Rack', name: 'Garlic Powder', qty: '1 jar', opened: '2026-01-10', expiry: '2027-06-01' },
-            { id: 6, zone: 'Spice Rack', name: 'Cumin', qty: '1 jar', opened: '2026-02-01', expiry: '2027-06-01' }
+        // Digital Twin Inventory Data
+        let inventoryData = [
+            { id: 1, zone: 'Fridge', name: 'Chicken Thighs', opened: '2026-08-25', expiry: '2026-08-29' },
+            { id: 2, zone: 'Fridge', name: 'Rice', opened: '2026-08-20', expiry: '2026-09-10' },
+            { id: 3, zone: 'Fridge', name: 'Salmon Fillet', opened: '2026-08-24', expiry: '2026-08-28' },
+            { id: 4, zone: 'Cupboard', name: 'Quinoa Grain', opened: '2026-06-01', expiry: '2027-01-20' },
+            { id: 5, zone: 'Spice Rack', name: 'Teriyaki Sauce', opened: '2026-02-10', expiry: '2027-06-01' }
         ];
 
-        // Expanded Global Recipe Database with Portion Scaling, Storage & Multi-tier Metadata
-        let recipes = [
+        // Recipe Database Mock Data with Scalable Base Quantities & Costs
+        let recipesData = [
             {
-                id: 1,
-                title: "Garlic Butter Chicken Thighs & Rice",
-                origin: "Mediterranean",
-                proteinTag: "Chicken",
-                cookware: "One Pot",
-                prepTime: 10,
-                cookTime: 20,
-                cals: 650,
-                proteinG: 48,
-                tier: "Standard",
-                costPerServ: 2.40,
-                baseServings: 1,
-                currentServings: 1,
-                ingredients: [
-                    { name: "Chicken Thighs", amount: 250, unit: "g" },
-                    { name: "Butter", amount: 20, unit: "g" },
-                    { name: "Rice", amount: 80, unit: "g" },
-                    { name: "Garlic Powder", amount: 5, unit: "g" }
-                ],
-                storage: "Store airtight in fridge for up to 3 days. Freeze cooked rice & chicken up to 1 month."
-            },
-            {
-                id: 2,
-                title: "One-Pan Lemon Herb Salmon & Asparagus",
-                origin: "Italy",
-                proteinTag: "Seafood",
-                cookware: "Sheet Pan",
-                prepTime: 5,
-                cookTime: 12,
-                cals: 520,
-                proteinG: 42,
-                tier: "Premium",
-                costPerServ: 5.50,
-                baseServings: 1,
-                currentServings: 1,
-                ingredients: [
-                    { name: "Salmon Fillet", amount: 180, unit: "g" },
-                    { name: "Asparagus", amount: 100, unit: "g" },
-                    { name: "Butter", amount: 15, unit: "g" }
-                ],
-                storage: "Eat fresh or refrigerate cooked salmon for up to 2 days."
-            },
-            {
-                id: 3,
-                title: "Chickpea & Cumin One-Pot Curry",
-                origin: "India",
-                proteinTag: "Vegetarian",
-                cookware: "One Pot",
-                prepTime: 5,
-                cookTime: 15,
-                cals: 420,
-                proteinG: 18,
-                tier: "Budget",
-                costPerServ: 0.95,
-                baseServings: 1,
-                currentServings: 1,
-                ingredients: [
-                    { name: "Chickpeas", amount: 1, unit: "can" },
-                    { name: "Cumin", amount: 5, unit: "g" },
-                    { name: "Garlic Powder", amount: 5, unit: "g" }
-                ],
-                storage: "Refrigerate up to 4 days. Tastes even better the next day."
-            },
-            {
-                id: 4,
-                title: "Sheet-Pan Chicken Teriyaki & Broccoli",
+                id: "RCP-001",
+                name: "Sheet-Pan Chicken Teriyaki & Broccoli",
                 origin: "Japan",
-                proteinTag: "Chicken",
+                proteinCategory: "Chicken",
                 cookware: "Sheet Pan",
-                prepTime: 10,
-                cookTime: 15,
-                cals: 580,
-                proteinG: 45,
-                tier: "Standard",
-                costPerServ: 3.10,
-                baseServings: 1,
-                currentServings: 1,
+                tier: "Standard (Tesco/Sainsbury's)",
+                prepMin: 10,
+                cookMin: 15,
+                baseCostPerServ: 3.10,
+                baseCals: 580,
+                baseProtein: 45,
+                servings: 1,
+                storage: "Keep in meal prep containers in fridge for up to 4 days.",
                 ingredients: [
-                    { name: "Chicken Thighs", amount: 250, unit: "g" },
-                    { name: "Broccoli", amount: 150, unit: "g" },
-                    { name: "Rice", amount: 80, unit: "g" }
-                ],
-                storage: "Keep in meal prep containers in fridge for up to 4 days."
+                    { name: "Chicken Thighs", baseQty: 250, unit: "g" },
+                    { name: "Broccoli", baseQty: 150, unit: "g" },
+                    { name: "Rice", baseQty: 80, unit: "g" }
+                ]
             },
             {
-                id: 5,
-                title: "One-Skillet Beef Fajita Bowl",
-                origin: "Mexico",
-                proteinTag: "Beef",
+                id: "RCP-002",
+                name: "One Pot Garlic Salmon Bowl",
+                origin: "Mediterranean",
+                proteinCategory: "Seafood",
+                cookware: "One Pot (Zero Wash-up)",
+                tier: "Premium (Waitrose/M&S)",
+                prepMin: 10,
+                cookMin: 20,
+                baseCostPerServ: 4.50,
+                baseCals: 650,
+                baseProtein: 48,
+                servings: 1,
+                storage: "Best consumed within 2 days of preparation.",
+                ingredients: [
+                    { name: "Salmon Fillet", baseQty: 200, unit: "g" },
+                    { name: "Spinach", baseQty: 100, unit: "g" },
+                    { name: "Quinoa Grain", baseQty: 75, unit: "g" }
+                ]
+            },
+            {
+                id: "RCP-003",
+                name: "Skillet Beef Stir-Fry",
+                origin: "China",
+                proteinCategory: "Beef",
                 cookware: "Skillet",
-                prepTime: 10,
-                cookTime: 10,
-                cals: 610,
-                proteinG: 50,
-                tier: "Standard",
-                costPerServ: 3.80,
-                baseServings: 1,
-                currentServings: 1,
+                tier: "Budget (Aldi/Lidl)",
+                prepMin: 12,
+                cookMin: 10,
+                baseCostPerServ: 2.80,
+                baseCals: 520,
+                baseProtein: 42,
+                servings: 1,
+                storage: "Refrigerate in airtight container up to 3 days.",
                 ingredients: [
-                    { name: "Beef Strips", amount: 200, unit: "g" },
-                    { name: "Peppers", amount: 100, unit: "g" },
-                    { name: "Cumin", amount: 5, unit: "g" }
-                ],
-                storage: "Store beef and peppers separately from salsa. Consume within 3 days."
-            },
-            {
-                id: 6,
-                title: "Thai Red Curry Seafood Noodle Pot",
-                origin: "Thailand",
-                proteinTag: "Seafood",
-                cookware: "One Pot",
-                prepTime: 8,
-                cookTime: 10,
-                cals: 490,
-                proteinG: 36,
-                tier: "Premium",
-                costPerServ: 4.90,
-                baseServings: 1,
-                currentServings: 1,
-                ingredients: [
-                    { name: "Prawns", amount: 150, unit: "g" },
-                    { name: "Coconut Milk", amount: 200, unit: "ml" },
-                    { name: "Noodles", amount: 100, unit: "g" }
-                ],
-                storage: "Best consumed immediately. Do not freeze."
+                    { name: "Beef Strips", baseQty: 200, unit: "g" },
+                    { name: "Peppers", baseQty: 120, unit: "g" },
+                    { name: "Noodles", baseQty: 100, unit: "g" }
+                ]
             }
         ];
 
-        let historyDb = {};
-        const todayStr = new Date().toISOString().split('T')[0];
-        document.getElementById('tracker-date').value = todayStr;
-        document.getElementById('twin-opened-input').value = todayStr;
-        document.getElementById('twin-expiry-input').value = todayStr;
+        const TODAY = new Date('2026-08-27');
 
-        function resetToHome() {
-            switchTab('tracker-view');
-            renderDigitalTwin();
-            renderMultidex();
-        }
-
-        function switchTab(viewId) {
-            document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-
-            document.getElementById(viewId).classList.add('active');
-
-            if (viewId === 'tracker-view') {
-                document.getElementById('tab-tracker').classList.add('active');
-                renderTracker();
-            }
-            if (viewId === 'survey-view') document.getElementById('tab-survey').classList.add('active');
-            if (viewId === 'twin-view') {
-                document.getElementById('tab-twin').classList.add('active');
-                renderDigitalTwin();
-            }
-            if (viewId === 'multidex-view') {
-                document.getElementById('tab-multidex').classList.add('active');
-                renderMultidex();
-            }
-        }
-
-        /* TRACKER LOGIC */
-        function renderTracker() {
-            const date = document.getElementById('tracker-date').value || todayStr;
-            if (!historyDb[date]) {
-                historyDb[date] = {
-                    meals: { Breakfast: [], Lunch: [], Dinner: [], Snacks: [] },
-                    burned: 0,
-                    weight: 75.0
-                };
-            }
-
-            const dayData = historyDb[date];
-            let totalCals = 0;
-            let totalProt = 0;
-            const tbody = document.getElementById('tracker-tbody');
-            tbody.innerHTML = '';
-
-            const categories = ['Breakfast', 'Lunch', 'Dinner', 'Snacks'];
-            categories.forEach(cat => {
-                const items = dayData.meals[cat] || [];
-                tbody.innerHTML += '<tr class="meal-cat-row"><td colspan="3">' + cat + '</td></tr>';
-
-                if (items.length === 0) {
-                    tbody.innerHTML += '<tr><td colspan="3" style="color:var(--text-muted); font-size:0.85rem;">No entries logged</td></tr>';
-                } else {
-                    items.forEach(i => {
-                        totalCals += i.cals;
-                        totalProt += i.prot;
-                        tbody.innerHTML += 
-                            '<tr>' +
-                                '<td>' + i.name + '</td>' +
-                                '<td>' + i.cals + ' kcal</td>' +
-                                '<td>' + i.prot + 'g</td>' +
-                            '</tr>';
-                    });
+        // Navigation Controller
+        function navigateTo(viewId) {
+            document.querySelectorAll('.view-panel').forEach(panel => panel.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-purple-700', 'font-semibold');
+                btn.classList.add('text-gray-600');
+                if (btn.getAttribute('data-target') === viewId) {
+                    btn.classList.add('text-purple-700', 'font-semibold');
+                    btn.classList.remove('text-gray-600');
                 }
             });
-
-            document.getElementById('dash-cals').innerText = totalCals;
-            document.getElementById('dash-protein').innerText = totalProt + 'g';
-            document.getElementById('dash-burned').innerText = dayData.burned;
-            document.getElementById('dash-weight').innerText = dayData.weight.toFixed(1);
+            const target = document.getElementById(`view-${viewId}`);
+            if (target) target.classList.remove('hidden');
         }
 
-        function logMealEntry(e) {
-            e.preventDefault();
-            const date = document.getElementById('tracker-date').value || todayStr;
-            const cat = document.getElementById('log-meal-cat').value;
-            const name = document.getElementById('log-food-name').value;
-            const cals = parseInt(document.getElementById('log-food-cals').value) || 0;
-            const prot = parseInt(document.getElementById('log-food-prot').value) || 0;
-
-            if (!historyDb[date]) {
-                historyDb[date] = { meals: { Breakfast: [], Lunch: [], Dinner: [], Snacks: [] }, burned: 0, weight: 75.0 };
-            }
-
-            historyDb[date].meals[cat].push({ name: name, cals: cals, prot: prot });
-            renderTracker();
-
-            document.getElementById('log-food-name').value = '';
-            document.getElementById('log-food-cals').value = '';
-            document.getElementById('log-food-prot').value = '';
-        }
-
-        function logExercise(e) {
-            e.preventDefault();
-            const date = document.getElementById('tracker-date').value || todayStr;
-            const cals = parseInt(document.getElementById('log-ex-cals').value) || 0;
-
-            if (!historyDb[date]) {
-                historyDb[date] = { meals: { Breakfast: [], Lunch: [], Dinner: [], Snacks: [] }, burned: 0, weight: 75.0 };
-            }
-
-            historyDb[date].burned += cals;
-            renderTracker();
-
-            document.getElementById('log-ex-name').value = '';
-            document.getElementById('log-ex-cals').value = '';
-        }
-
-        function logWeight(e) {
-            e.preventDefault();
-            const date = document.getElementById('tracker-date').value || todayStr;
-            const weight = parseFloat(document.getElementById('log-weight-val').value) || 75.0;
-
-            if (!historyDb[date]) {
-                historyDb[date] = { meals: { Breakfast: [], Lunch: [], Dinner: [], Snacks: [] }, burned: 0, weight: 75.0 };
-            }
-
-            historyDb[date].weight = weight;
-            renderTracker();
-
-            document.getElementById('log-weight-val').value = '';
-        }
-
-        /* WIZARD LOGIC */
-        function answerWiz(key, val, nextStep) {
-            wizardData[key] = val;
-            nextWizStep(nextStep);
-        }
-
-        function nextWizStep(stepNum) {
-            if (stepNum === 3) {
-                wizardData.weight = parseFloat(document.getElementById('wiz-weight').value) || 75;
-                wizardData.height = parseFloat(document.getElementById('wiz-height').value) || 175;
-                wizardData.age = parseFloat(document.getElementById('wiz-age').value) || 28;
-            }
-
-            document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
-            document.getElementById('wiz-step-' + stepNum).classList.add('active');
-
-            if (stepNum === 4) calculateWizardResults();
-        }
-
-        function calculateWizardResults() {
-            let bmr = (10 * wizardData.weight) + (6.25 * wizardData.height) - (5 * wizardData.age) + (wizardData.sex === 'male' ? 5 : -161);
-            let tdee = bmr * 1.45;
-
-            if (wizardData.goal === 'cut') tdee *= 0.85;
-            if (wizardData.goal === 'bulk') tdee *= 1.10;
-
-            calculatedMacros.cals = Math.round(tdee);
-            calculatedMacros.protein = Math.round((calculatedMacros.cals * 0.30) / 4);
-
-            document.getElementById('live-macro-indicator').innerText = 
-                'Daily Goal: ' + calculatedMacros.cals + ' kcal | P: ' + calculatedMacros.protein + 'g';
-            document.getElementById('sub-target-cals').innerText = '/ ' + calculatedMacros.cals + ' kcal Goal';
-            document.getElementById('sub-target-prot').innerText = '/ ' + calculatedMacros.protein + 'g Goal';
-
-            document.getElementById('wiz-macro-summary').innerHTML = 
-                '<strong>Daily Target:</strong> ' + calculatedMacros.cals + ' kcal | ' + calculatedMacros.protein + 'g Protein';
-
-            const suggested = recipes[0];
-            const calPct = Math.round((suggested.cals / calculatedMacros.cals) * 100);
-            const protPct = Math.round((suggested.proteinG / calculatedMacros.protein) * 100);
-
-            document.getElementById('wiz-suggested-meal').innerHTML = 
-                '<h3 style="color:var(--primary); font-weight: 700;">' + suggested.title + '</h3>' +
-                '<p style="font-size:0.9rem; color:var(--text-muted); margin:0.4rem 0;">Suggested based on your metrics</p>' +
-                '<div style="margin-top:0.8rem; font-size:0.9rem;">' +
-                    '<div><strong>Calories:</strong> ' + suggested.cals + ' kcal (' + calPct + '% of daily target)</div>' +
-                    '<div><strong>Protein:</strong> ' + suggested.proteinG + 'g (' + protPct + '% of daily target)</div>' +
-                '</div>';
-        }
-
-        function resetWiz() { nextWizStep(1); }
-
-        /* DIGITAL TWIN LOGIC (EXPIRATION TRACKING) */
-        function toggleDoor(applianceId) {
-            document.getElementById(applianceId).classList.toggle('open');
-        }
-
-        function addTwinItem(e) {
-            e.preventDefault();
-            const zone = document.getElementById('twin-zone-select').value;
-            const name = document.getElementById('twin-name-input').value;
-            const qty = document.getElementById('twin-qty-input').value;
-            const opened = document.getElementById('twin-opened-input').value;
-            const expiry = document.getElementById('twin-expiry-input').value;
-
-            digitalTwin.push({
-                id: Date.now(),
-                zone: zone,
-                name: name,
-                qty: qty,
-                opened: opened,
-                expiry: expiry
-            });
-
+        // Logo Reset Function
+        function handleLogoClick() {
             renderDigitalTwin();
-            renderMultidex();
-
-            document.getElementById('twin-name-input').value = '';
-            document.getElementById('twin-qty-input').value = '';
+            renderRecipes();
+            navigateTo('home');
         }
 
-        function removeTwinItem(id) {
-            digitalTwin = digitalTwin.filter(i => i.id !== id);
-            renderDigitalTwin();
-            renderMultidex();
-        }
-
-        function renderDigitalTwin() {
-            const zones = ['Fridge', 'Cupboard', 'Spice Rack'];
-            const today = new Date(todayStr);
-
-            zones.forEach(z => {
-                const containerId = 'items-' + z.toLowerCase().replace(' ', '');
-                const container = document.getElementById(containerId);
-                const items = digitalTwin.filter(i => i.zone === z);
-
-                if (items.length === 0) {
-                    container.innerHTML = '<p style="color:var(--text-muted); font-size:0.85rem;">Empty</p>';
-                } else {
-                    container.innerHTML = items.map(i => {
-                        const expDate = new Date(i.expiry);
-                        const diffTime = expDate - today;
-                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-                        let cardClass = "";
-                        let badgeHtml = "";
-
-                        if (diffDays < 0) {
-                            cardClass = "danger-exp";
-                            badgeHtml = '<span class="badge-status badge-expired">Expired (' + Math.abs(diffDays) + 'd ago)</span>';
-                        } else if (diffDays <= 3) {
-                            cardClass = "warning-exp";
-                            badgeHtml = '<span class="badge-status badge-soon">Expiring in ' + diffDays + 'd</span>';
-                        } else {
-                            badgeHtml = '<span class="badge-status badge-fresh">Fresh (' + diffDays + 'd left)</span>';
-                        }
-
-                        return '<div class="inventory-card ' + cardClass + '">' +
-                            '<button class="btn-del" onclick="removeTwinItem(' + i.id + ')">✕</button>' +
-                            '<div class="inventory-card-header">' +
-                                '<span>' + i.name + '</span>' +
-                            '</div>' +
-                            '<div class="inventory-card-meta">' +
-                                '<span>Qty: ' + i.qty + '</span>' +
-                                '<span>Opened: ' + i.opened + '</span>' +
-                            '</div>' +
-                            '<div style="margin-top:0.3rem;">' + badgeHtml + '</div>' +
-                        '</div>';
-                    }).join('');
-                }
-            });
-        }
-
-        /* GLOBAL RECIPE MATRIX & PARSER LOGIC */
-        function setMapFilter(origin) {
-            currentMapFilter = origin;
-            document.querySelectorAll('.map-node-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.innerText.includes(origin) || (origin === 'All' && btn.innerText.includes('All')));
-            });
-            renderMultidex();
-        }
-
-        function updateServings(recipeId, delta) {
-            const r = recipes.find(item => item.id === recipeId);
-            if (r) {
-                r.currentServings = Math.max(1, (r.currentServings || 1) + delta);
-                renderMultidex();
+        // Adjust Portion Servings Dynamic Scaler
+        function adjustServings(recipeId, delta) {
+            const recipe = recipesData.find(r => r.id === recipeId);
+            if (recipe) {
+                recipe.servings = Math.max(1, recipe.servings + delta);
+                renderRecipes();
             }
         }
 
-        async function synthesizeRecipeLive() {
-            const query = document.getElementById('synth-input').value;
-            if (!query) return;
+        // Render Recipe Database Cards & Match against Digital Twin
+        function renderRecipes() {
+            const search = document.getElementById('recipe-search').value.toLowerCase();
+            const fltProtein = document.getElementById('flt-protein').value;
+            const fltCookware = document.getElementById('flt-cookware').value;
+            const fltTier = document.getElementById('flt-tier').value;
+            const fltTime = document.getElementById('flt-time').value;
+            const fltInventory = document.getElementById('flt-inventory').value;
+            const fltSort = document.getElementById('flt-sort').value;
 
-            // AI Web Parser Simulation
-            const isSeafood = query.toLowerCase().includes('salmon') || query.toLowerCase().includes('prawn') || query.toLowerCase().includes('fish');
-            const isVeg = query.toLowerCase().includes('chickpea') || query.toLowerCase().includes('tofu') || query.toLowerCase().includes('veg');
-            const proteinTag = isSeafood ? "Seafood" : (isVeg ? "Vegetarian" : "Chicken");
-            const cookware = query.toLowerCase().includes('sheet') ? "Sheet Pan" : "One Pot";
+            // Current inventory item names normalized
+            const inStockNames = inventoryData.map(i => i.name.toLowerCase());
 
-            const newRecipe = {
-                id: Date.now(),
-                title: query.charAt(0).toUpperCase() + query.slice(1),
-                origin: "International",
-                proteinTag: proteinTag,
-                cookware: cookware,
-                prepTime: 10,
-                cookTime: 18,
-                cals: 540,
-                proteinG: 40,
-                tier: "Standard",
-                costPerServ: 3.20,
-                baseServings: 1,
-                currentServings: 1,
-                ingredients: [
-                    { name: "Chicken Thighs", amount: 200, unit: "g" },
-                    { name: "Garlic Powder", amount: 5, unit: "g" },
-                    { name: "Rice", amount: 80, unit: "g" }
-                ],
-                storage: "Store sealed in refrigerator for up to 3 days."
-            };
+            let filtered = recipesData.filter(r => {
+                const matchesSearch = r.name.toLowerCase().includes(search) || r.origin.toLowerCase().includes(search);
+                const matchesProtein = (fltProtein === 'All') || (r.proteinCategory === fltProtein);
+                const matchesCookware = (fltCookware === 'All') || (r.cookware.includes(fltCookware));
+                const matchesTier = (fltTier === 'All') || (r.tier.startsWith(fltTier));
+                const totalTime = r.prepMin + r.cookMin;
+                const matchesTime = (fltTime === 'Any') || (totalTime <= parseInt(fltTime));
 
-            recipes.unshift(newRecipe);
-            document.getElementById('synth-input').value = '';
-            renderMultidex();
-        }
+                // Stock matching
+                const inStockCount = r.ingredients.filter(ing => inStockNames.some(stock => stock.includes(ing.name.toLowerCase()))).length;
+                const is100Percent = inStockCount === r.ingredients.length;
+                const matchesInv = (fltInventory === 'All') || (fltInventory === '100' && is100Percent);
 
-        function renderMultidex() {
-            const proteinFlt = document.getElementById('flt-protein').value;
-            const cookwareFlt = document.getElementById('flt-cookware').value;
-            const storeFlt = document.getElementById('flt-store').value;
-            const maxTimeFlt = parseInt(document.getElementById('flt-time').value) || 999;
-            const sortFlt = document.getElementById('flt-sort').value;
-            const stockFlt = document.getElementById('flt-stock').value;
-            const grid = document.getElementById('multidex-grid');
-
-            const stockNames = digitalTwin.map(i => i.name.toLowerCase());
-
-            // Process inventory availability
-            let processed = recipes.map(r => {
-                const have = [];
-                const buy = [];
-
-                r.ingredients.forEach(ing => {
-                    if (stockNames.some(s => s.includes(ing.name.toLowerCase()) || ing.name.toLowerCase().includes(s))) {
-                        have.push(ing.name);
-                    } else {
-                        buy.push(ing.name);
-                    }
-                });
-
-                return { ...r, have: have, buy: buy };
-            });
-
-            // Filter logic
-            let filtered = processed.filter(r => {
-                const matchesMap = (currentMapFilter === 'All' || r.origin.toLowerCase().includes(currentMapFilter.toLowerCase()));
-                const matchesProtein = (proteinFlt === 'All' || r.proteinTag === proteinFlt);
-                const matchesCookware = (cookwareFlt === 'All' || r.cookware === cookwareFlt);
-                const matchesStore = (storeFlt === 'All' || r.tier === storeFlt);
-                const matchesTime = (r.prepTime + r.cookTime) <= maxTimeFlt;
-                const matchesStock = (stockFlt === 'All' || r.buy.length === 0);
-
-                return matchesMap && matchesProtein && matchesCookware && matchesStore && matchesTime && matchesStock;
+                return matchesSearch && matchesProtein && matchesCookware && matchesTier && matchesTime && matchesInv;
             });
 
             // Sorting logic
-            if (sortFlt === 'cals-asc') filtered.sort((a,b) => a.cals - b.cals);
-            if (sortFlt === 'cals-desc') filtered.sort((a,b) => b.cals - a.cals);
-            if (sortFlt === 'prot-desc') filtered.sort((a,b) => b.proteinG - a.proteinG);
-            if (sortFlt === 'cost-asc') filtered.sort((a,b) => a.costPerServ - b.costPerServ);
+            if (fltSort === 'CalLow') filtered.sort((a,b) => a.baseCals - b.baseCals);
+            if (fltSort === 'CalHigh') filtered.sort((a,b) => b.baseCals - a.baseCals);
+            if (fltSort === 'ProteinHigh') filtered.sort((a,b) => b.baseProtein - a.baseProtein);
+            if (fltSort === 'CostLow') filtered.sort((a,b) => a.baseCostPerServ - b.baseCostPerServ);
 
-            grid.innerHTML = filtered.map(r => {
-                const scale = r.currentServings || 1;
-                const totalCals = r.cals * scale;
-                const totalProt = r.proteinG * scale;
-                const totalCost = (r.costPerServ * scale).toFixed(2);
+            const container = document.getElementById('recipe-cards-container');
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-2 text-center text-gray-400 py-12">No recipes match the selected filters.</div>`;
+                return;
+            }
 
-                const statusBadge = r.buy.length === 0
-                    ? '<span class="ingredient-status status-have">100% In Stock</span>'
-                    : '<span class="ingredient-status status-buy">Missing: ' + r.buy.length + ' Items</span>';
+            container.innerHTML = filtered.map(r => {
+                const servings = r.servings || 1;
+                const totalCost = (r.baseCostPerServ * servings).toFixed(2);
+                const inStock = [];
+                const needToBuy = [];
 
-                const ingListHtml = r.ingredients.map(ing => {
-                    const scaledAmt = ing.amount * scale;
-                    return scaledAmt + ing.unit + ' ' + ing.name;
-                }).join(', ');
+                r.ingredients.forEach(ing => {
+                    const found = inStockNames.some(stock => stock.includes(ing.name.toLowerCase()));
+                    if (found) inStock.push(ing.name);
+                    else needToBuy.push(ing.name);
+                });
 
-                return '<div class="recipe-card">' +
-                    '<div>' +
-                        '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.5rem;">' +
-                            '<h3 style="font-weight: 700;">' + r.title + '</h3>' +
-                            statusBadge +
-                        '</div>' +
-                        '<div style="display:flex; gap:0.4rem; margin-bottom:0.6rem; flex-wrap:wrap;">' +
-                            '<span class="tag-pill">📍 ' + r.origin + '</span>' +
-                            '<span class="tag-pill">🍗 ' + r.proteinTag + '</span>' +
-                            '<span class="tag-pill">🍳 ' + r.cookware + '</span>' +
-                        '</div>' +
-                        
-                        '<div style="display:flex; justify-content:space-between; align-items:center; margin:0.8rem 0; background:#f8fafc; padding:0.5rem; border-radius:6px;">' +
-                            '<div class="portion-scaler">' +
-                                '<span>Servings:</span>' +
-                                '<button class="portion-btn" onclick="updateServings(' + r.id + ', -1)">-</button>' +
-                                '<span style="font-weight:700;">' + scale + '</span>' +
-                                '<button class="portion-btn" onclick="updateServings(' + r.id + ', 1)">+</button>' +
-                            '</div>' +
-                            '<div style="font-weight:700; color:var(--primary); font-size:0.9rem;">£' + totalCost + ' total</div>' +
-                        '</div>' +
+                const missingCount = needToBuy.length;
+                const scaledIngredientsStr = r.ingredients.map(ing => `${ing.baseQty * servings}${ing.unit} ${ing.name}`).join(', ');
 
-                        '<div style="font-size:0.85rem; margin:0.6rem 0;">' +
-                            '<div><strong>Nutrition:</strong> ' + totalCals + ' kcal | ' + totalProt + 'g Protein</div>' +
-                            '<div><strong>Speed:</strong> Prep ' + r.prepTime + 'm | Cook ' + r.cookTime + 'm (' + (r.prepTime+r.cookTime) + 'm total)</div>' +
-                            '<div style="margin-top:0.4rem;"><strong>Scaled Ingredients:</strong> ' + ingListHtml + '</div>' +
-                        '</div>' +
+                return `
+                    <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm hover:border-purple-300 transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-lg text-gray-900 leading-snug">${r.name}</h3>
+                                ${missingCount === 0 
+                                    ? `<span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap">100% In Stock</span>`
+                                    : `<span class="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap">Missing: ${missingCount} Items</span>`
+                                }
+                            </div>
 
-                        '<div class="storage-box">' +
-                            '<strong>📦 Storage:</strong> ' + r.storage +
-                        '</div>' +
+                            <div class="flex flex-wrap gap-2 text-xs text-gray-600 mb-4">
+                                <span class="bg-gray-100 px-2 py-0.5 rounded-md">📍 ${r.origin}</span>
+                                <span class="bg-purple-100 text-purple-800 font-semibold px-2 py-0.5 rounded-md">🍗 ${r.proteinCategory}</span>
+                                <span class="bg-blue-100 text-blue-800 font-semibold px-2 py-0.5 rounded-md">🍳 ${r.cookware}</span>
+                            </div>
 
-                        '<div style="font-size:0.85rem; margin-top:0.8rem;">' +
-                            '<div style="color:var(--success);"><strong>In Stock:</strong> ' + (r.have.join(', ') || 'None') + '</div>' +
-                            '<div style="color:var(--danger); margin-top:0.2rem;"><strong>Need to Buy:</strong> ' + (r.buy.join(', ') || 'None! Ready to cook.') + '</div>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="supermarket-badge">' +
-                        '<span>Tier: ' + r.tier + ' Supermarket</span>' +
-                        '<span>£' + r.costPerServ.toFixed(2) + ' / serving</span>' +
-                    '</div>' +
-                '</div>';
+                            <div class="bg-purple-50/50 rounded-xl p-3 border border-purple-100 mb-4 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xs font-semibold text-gray-500 uppercase">Servings:</span>
+                                    <button onclick="adjustServings('${r.id}', -1)" class="w-6 h-6 bg-white border border-gray-300 rounded font-bold hover:bg-purple-100">-</button>
+                                    <span class="font-extrabold text-purple-900 text-sm px-1">${servings}</span>
+                                    <button onclick="adjustServings('${r.id}', 1)" class="w-6 h-6 bg-white border border-gray-300 rounded font-bold hover:bg-purple-100">+</button>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-base font-black text-purple-900">£${totalCost} total</span>
+                                    <span class="text-[10px] text-gray-400 block">(£${r.baseCostPerServ.toFixed(2)} / serving)</span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1.5 text-xs text-gray-700 mb-4">
+                                <p><strong>Nutrition:</strong> ${r.baseCals * servings} kcal | ${r.baseProtein * servings}g Protein</p>
+                                <p><strong>Speed:</strong> Prep ${r.prepMin}m | Cook ${r.cookMin}m (${r.prepMin + r.cookMin}m total)</p>
+                                <p class="text-purple-900 font-medium"><strong>Scaled Ingredients:</strong> ${scaledIngredientsStr}</p>
+                                <p class="text-gray-500"><strong>📦 Storage:</strong> ${r.storage}</p>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-t border-gray-100 text-xs space-y-1">
+                            <p class="text-emerald-700"><strong>In Stock:</strong> ${inStock.length > 0 ? inStock.join(', ') : 'None'}</p>
+                            <p class="text-amber-700"><strong>Need to Buy:</strong> ${needToBuy.length > 0 ? needToBuy.join(', ') : 'None'}</p>
+                            <p class="text-gray-400 text-[11px] pt-1">Tier: ${r.tier}</p>
+                        </div>
+                    </div>
+                `;
             }).join('');
         }
 
-        renderTracker();
-        renderDigitalTwin();
+        // Render Digital Twin Inventory
+        function renderDigitalTwin() {
+            const zones = ['Fridge', 'Cupboard', 'Spice Rack'];
+            let expiringCount = 0;
+
+            zones.forEach(z => {
+                const targetId = 'container-' + z.toLowerCase().replace(' ', '');
+                const countId = z.toLowerCase().replace(' ', '') + '-count';
+                const container = document.getElementById(targetId);
+                const items = inventoryData.filter(i => i.zone === z);
+
+                document.getElementById(countId).innerText = `${items.length} items`;
+
+                container.innerHTML = items.map(item => {
+                    const expDate = new Date(item.expiry);
+                    const diffDays = Math.ceil((expDate - TODAY) / (1000 * 60 * 60 * 24));
+                    
+                    let badgeClass = "bg-purple-100 text-purple-800";
+                    let statusText = `${diffDays} days left`;
+                    let cardBorder = "border-gray-200";
+
+                    if (diffDays <= 2 && diffDays >= 0) {
+                        badgeClass = "bg-red-100 text-red-800 font-bold";
+                        statusText = "Expiring Soon!";
+                        cardBorder = "border-red-300 bg-red-50/30";
+                        expiringCount++;
+                    }
+
+                    return `
+                        <div class="p-3 border ${cardBorder} rounded-xl bg-white flex justify-between items-center shadow-2xs">
+                            <div>
+                                <h4 class="font-bold text-xs text-gray-900">${item.name}</h4>
+                                <p class="text-[10px] text-gray-400">Opened: ${item.opened} | Exp: ${item.expiry}</p>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded ${badgeClass}">${statusText}</span>
+                                <button onclick="deleteInventoryItem(${item.id})" class="text-gray-300 hover:text-red-500 font-bold text-xs p-1">✕</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            });
+
+            document.getElementById('badge-expiring-count').innerText = `${expiringCount} Expiring Soon`;
+        }
+
+        function addInventoryItem(e) {
+            e.preventDefault();
+            const newItem = {
+                id: Date.now(),
+                zone: document.getElementById('inv-zone').value,
+                name: document.getElementById('inv-name').value,
+                opened: document.getElementById('inv-opened').value,
+                expiry: document.getElementById('inv-expiry').value
+            };
+            inventoryData.push(newItem);
+            renderDigitalTwin();
+            renderRecipes();
+            document.getElementById('inv-name').value = '';
+        }
+
+        function deleteInventoryItem(id) {
+            inventoryData = inventoryData.filter(item => item.id !== id);
+            renderDigitalTwin();
+            renderRecipes();
+        }
+
+        // Food Logger
+        function handleFoodLog(e) {
+            e.preventDefault();
+            const cals = parseInt(document.getElementById('food-cals').value) || 0;
+            const prot = parseInt(document.getElementById('food-prot').value) || 0;
+
+            const curEaten = parseInt(document.getElementById('sum-eaten').innerText) || 0;
+            const curProt = parseInt(document.getElementById('sum-protein').innerText) || 0;
+
+            document.getElementById('sum-eaten').innerText = `${curEaten + cals} `;
+            document.getElementById('sum-protein').innerText = `${curProt + prot}g `;
+
+            alert(`Logged ${document.getElementById('food-name').value} (+${cals} kcal, +${prot}g Protein).`);
+            document.getElementById('food-name').value = '';
+            document.getElementById('food-cals').value = '';
+            document.getElementById('food-prot').value = '';
+        }
+
+        // Exercise Logger
+        function handleManualLog(e) {
+            e.preventDefault();
+            const burn = parseInt(document.getElementById('ex-calories').value) || 0;
+            const currentBurn = parseInt(document.getElementById('sum-burned').innerText) || 0;
+            const newTotalBurn = currentBurn + burn;
+
+            document.getElementById('sum-burned').innerText = newTotalBurn;
+            alert(`Logged activity. Total exercise burn updated to ${newTotalBurn} kcal.`);
+        }
+
+        function toggleSync(provider) {
+            const elem = document.getElementById(`${provider}-status`);
+            if (elem.innerText === "Connected") {
+                elem.innerText = "Disconnected";
+                elem.className = "text-[10px] text-gray-400";
+            } else {
+                elem.innerText = "Connected";
+                elem.className = "text-[10px] text-purple-700 font-semibold";
+            }
+        }
+
+        function triggerAiLabeling() {
+            alert("AI Labeling pipeline initiated.");
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderRecipes();
+            renderDigitalTwin();
+            document.getElementById('inv-opened').value = '2026-08-27';
+            document.getElementById('inv-expiry').value = '2026-08-31';
+        });
     </script>
 </body>
 </html>
