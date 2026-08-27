@@ -58,21 +58,26 @@
                     Your integrated meal planner, AI-labeled recipe database, digital twin inventory, and fitness diary.
                 </p>
                 
-                <div class="bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white rounded-2xl p-8 max-w-xl mx-auto shadow-xl text-left relative overflow-hidden mb-10">
+                <div onclick="cycleDinnerSuggestion()" class="bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white rounded-2xl p-8 max-w-xl mx-auto shadow-xl text-left relative overflow-hidden mb-10 cursor-pointer hover:border-purple-300 border border-transparent transition group">
                     <div class="flex justify-between items-center mb-1">
-                        <span class="text-xs uppercase font-bold tracking-wider text-purple-300">Suggested Dinner Tonight</span>
+                        <span class="text-xs uppercase font-bold tracking-wider text-purple-300">Suggested Dinner Tonight (Click for next option)</span>
                         <span class="bg-purple-700/60 text-purple-200 text-xs px-2.5 py-0.5 rounded-full border border-purple-500/30">Matches Your Exercise Target</span>
                     </div>
-                    <h2 class="text-2xl font-bold mb-2">Sheet-Pan Chicken Teriyaki & Broccoli</h2>
-                    <p class="text-purple-200 text-sm mb-6">High-protein Asian dinner with fresh greens and rice. Matches your exercise target!</p>
+                    <h2 class="text-2xl font-bold mb-2 group-hover:text-purple-200 transition" id="suggested-title">Sheet-Pan Chicken Teriyaki & Broccoli</h2>
+                    <p class="text-purple-200 text-sm mb-6" id="suggested-desc">High-protein Asian dinner with fresh greens and rice. Matches your exercise target!</p>
                     <div class="flex flex-wrap gap-2 mb-6">
-                        <span class="bg-purple-950/60 text-purple-200 text-xs px-3 py-1 rounded-full font-medium border border-purple-700/50">25 mins</span>
-                        <span class="bg-purple-950/60 text-purple-200 text-xs px-3 py-1 rounded-full font-medium border border-purple-700/50">580 kcal</span>
+                        <span class="bg-purple-950/60 text-purple-200 text-xs px-3 py-1 rounded-full font-medium border border-purple-700/50" id="suggested-time">25 mins</span>
+                        <span class="bg-purple-950/60 text-purple-200 text-xs px-3 py-1 rounded-full font-medium border border-purple-700/50" id="suggested-cals">580 kcal</span>
                         <span class="bg-emerald-500 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">AI Verified</span>
                     </div>
-                    <button onclick="navigateTo('recipes')" class="w-full bg-white text-purple-900 hover:bg-purple-50 font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg text-center">
-                        Open Recipe Database
-                    </button>
+                    <div class="flex gap-2">
+                        <button onclick="event.stopPropagation(); navigateTo('recipes')" class="flex-1 bg-white text-purple-900 hover:bg-purple-50 font-bold py-3 px-4 rounded-xl text-sm transition shadow-lg text-center">
+                            Open Recipe Database
+                        </button>
+                        <button onclick="event.stopPropagation(); cycleDinnerSuggestion()" class="bg-purple-700 hover:bg-purple-600 text-white font-semibold py-3 px-4 rounded-xl text-sm transition text-center border border-purple-500/40">
+                            🔄 Next Suggestion
+                        </button>
+                    </div>
                 </div>
 
                 <div class="bg-white border border-purple-100 rounded-2xl p-6 shadow-sm max-w-4xl mx-auto text-left mb-8">
@@ -91,7 +96,7 @@
                             <span class="text-xs font-semibold text-purple-600 uppercase tracking-wider">Calories Consumed</span>
                             <div class="text-2xl font-black text-purple-900 mt-1" id="sum-eaten">1,450 <span class="text-xs font-normal text-gray-500">/ 2,200 kcal</span></div>
                             <div class="w-full bg-purple-200 h-1.5 rounded-full mt-2 overflow-hidden">
-                                <div class="bg-purple-600 h-1.5 rounded-full" style="width: 66%"></div>
+                                <div class="bg-purple-600 h-1.5 rounded-full" id="prog-eaten" style="width: 66%"></div>
                             </div>
                         </div>
 
@@ -99,7 +104,7 @@
                             <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Calories Burned</span>
                             <div class="text-2xl font-black text-emerald-900 mt-1" id="sum-burned">480 <span class="text-xs font-normal text-gray-500">kcal</span></div>
                             <div class="w-full bg-emerald-200 h-1.5 rounded-full mt-2 overflow-hidden">
-                                <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 80%"></div>
+                                <div class="bg-emerald-500 h-1.5 rounded-full" id="prog-burned" style="width: 80%"></div>
                             </div>
                         </div>
 
@@ -107,7 +112,7 @@
                             <span class="text-xs font-semibold text-purple-600 uppercase tracking-wider">Protein Intake</span>
                             <div class="text-2xl font-black text-purple-900 mt-1" id="sum-protein">98g <span class="text-xs font-normal text-gray-500">/ 140g</span></div>
                             <div class="w-full bg-purple-200 h-1.5 rounded-full mt-2 overflow-hidden">
-                                <div class="bg-purple-600 h-1.5 rounded-full" style="width: 70%"></div>
+                                <div class="bg-purple-600 h-1.5 rounded-full" id="prog-protein" style="width: 70%"></div>
                             </div>
                         </div>
 
@@ -137,7 +142,7 @@
                     <div onclick="navigateTo('fitness')" class="p-6 bg-white border border-gray-200 rounded-2xl hover:border-purple-300 hover:shadow-md cursor-pointer transition text-left group">
                         <div class="w-10 h-10 bg-purple-100 text-purple-700 rounded-xl flex items-center justify-center font-bold mb-3 group-hover:bg-purple-600 group-hover:text-white transition">🏃</div>
                         <h3 class="font-bold text-gray-900 text-lg mb-1 group-hover:text-purple-700 transition">Fitness Diary</h3>
-                        <p class="text-xs text-gray-500">Log meals & exercise, sync Strava/Garmin, and review historical macro calendars.</p>
+                        <p class="text-xs text-gray-500">Log meals & exercise, set targets, track daily checklists, and sync wearables.</p>
                     </div>
                 </div>
             </div>
@@ -221,8 +226,7 @@
                     </div>
                 </aside>
 
-                <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6" id="recipe-cards-container">
-                    </div>
+                <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6" id="recipe-cards-container"></div>
             </div>
         </section>
 
@@ -273,9 +277,7 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
                     <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
-                        <h2 class="font-bold text-gray-900 flex items-center gap-2">
-                            <span>🧊</span> Fridge
-                        </h2>
+                        <h2 class="font-bold text-gray-900 flex items-center gap-2"><span>🧊</span> Fridge</h2>
                         <span class="text-xs text-gray-400 font-medium" id="fridge-count">0 items</span>
                     </div>
                     <div id="container-fridge" class="space-y-3"></div>
@@ -283,9 +285,7 @@
 
                 <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
                     <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
-                        <h2 class="font-bold text-gray-900 flex items-center gap-2">
-                            <span>🥫</span> Cupboard
-                        </h2>
+                        <h2 class="font-bold text-gray-900 flex items-center gap-2"><span>🥫</span> Cupboard</h2>
                         <span class="text-xs text-gray-400 font-medium" id="cupboard-count">0 items</span>
                     </div>
                     <div id="container-cupboard" class="space-y-3"></div>
@@ -293,9 +293,7 @@
 
                 <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
                     <div class="flex items-center justify-between border-b border-gray-100 pb-3 mb-4">
-                        <h2 class="font-bold text-gray-900 flex items-center gap-2">
-                            <span>🌶️</span> Spice Rack
-                        </h2>
+                        <h2 class="font-bold text-gray-900 flex items-center gap-2"><span>🌶️</span> Spice Rack</h2>
                         <span class="text-xs text-gray-400 font-medium" id="spicerack-count">0 items</span>
                     </div>
                     <div id="container-spicerack" class="space-y-3"></div>
@@ -306,39 +304,153 @@
         <section id="view-fitness" class="view-panel hidden">
             <div class="flex justify-between items-center mb-6">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">Fitness Diary & Daily Logs</h1>
-                    <p class="text-gray-500 text-sm">Combined food log, exercise tracking, wearable integrations, and macro calendar</p>
+                    <h1 class="text-2xl font-bold text-gray-900">Fitness Diary</h1>
+                    <p class="text-gray-500 text-sm">Personal biometric setup, target proximity, daily meal checklists, and wearable activity sync</p>
                 </div>
             </div>
-            
+
+            <div class="bg-white border border-purple-200 rounded-2xl p-6 mb-8 shadow-sm">
+                <h2 class="text-base font-bold text-purple-900 mb-1 flex items-center gap-2">
+                    <span>⚙️</span> Personal Biometrics & Fitness Goals
+                </h2>
+                <p class="text-xs text-gray-500 mb-4">Configure your target targets to adjust recommended meal options and calorie allowances.</p>
+                <form onsubmit="saveFitnessGoals(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Current Weight (kg)</label>
+                        <input type="number" step="0.1" id="goal-weight" value="74.5" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Fitness Goal</label>
+                        <select id="goal-type" class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                            <option value="Hypertrophy">Muscle Gain & Hypertrophy</option>
+                            <option value="Fat Loss">Fat Loss & Recomposition</option>
+                            <option value="Endurance">Endurance & Running</option>
+                            <option value="Maintenance">Weight Maintenance</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Target Intake (kcal)</label>
+                        <input type="number" id="goal-cals" value="2200" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Target Protein (g)</label>
+                        <input type="number" id="goal-protein" value="140" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                    </div>
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-purple-700 text-white font-semibold py-2 px-4 rounded-lg text-sm hover:bg-purple-800 transition">
+                            Update Targets
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white p-6 border border-gray-200 rounded-2xl shadow-sm flex flex-col justify-between">
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900 mb-1">Daily Goal Progress & Proximity</h2>
+                        <p class="text-xs text-gray-500 mb-4">Real-time proximity calculations against your configured targets</p>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1">
+                                    <span class="text-gray-700">Caloric Target</span>
+                                    <span class="text-purple-700" id="prox-cal-text">1,450 / 2,200 kcal (66%)</span>
+                                </div>
+                                <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-purple-600 h-2.5 rounded-full" id="prox-cal-bar" style="width: 66%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1">
+                                    <span class="text-gray-700">Protein Target</span>
+                                    <span class="text-purple-700" id="prox-prot-text">98g / 140g (70%)</span>
+                                </div>
+                                <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-purple-600 h-2.5 rounded-full" id="prox-prot-bar" style="width: 70%"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-1">
+                                    <span class="text-gray-700">Workout Burn Target</span>
+                                    <span class="text-emerald-700" id="prox-burn-text">480 / 500 kcal (96%)</span>
+                                </div>
+                                <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                                    <div class="bg-emerald-500 h-2.5 rounded-full" id="prox-burn-bar" style="width: 96%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 border border-gray-200 rounded-2xl shadow-sm">
+                    <h2 class="text-lg font-bold text-gray-900 mb-1">Daily Meal Checklist</h2>
+                    <p class="text-xs text-gray-500 mb-4">Track which meals you have recorded today</p>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-3.5 border rounded-xl" id="chk-card-breakfast">
+                            <div class="flex items-center gap-3">
+                                <span class="text-lg" id="chk-icon-breakfast">✅</span>
+                                <div>
+                                    <h4 class="font-bold text-sm text-gray-900">Breakfast</h4>
+                                    <p class="text-xs text-gray-500" id="chk-desc-breakfast">Oatmeal & Protein Shake (450 kcal)</p>
+                                </div>
+                            </div>
+                            <button onclick="toggleMealCheck('breakfast')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border transition" id="chk-btn-breakfast">Log Meal</button>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3.5 border rounded-xl" id="chk-card-lunch">
+                            <div class="flex items-center gap-3">
+                                <span class="text-lg" id="chk-icon-lunch">✅</span>
+                                <div>
+                                    <h4 class="font-bold text-sm text-gray-900">Lunch</h4>
+                                    <p class="text-xs text-gray-500" id="chk-desc-lunch">Chicken Salad Wrap (520 kcal)</p>
+                                </div>
+                            </div>
+                            <button onclick="toggleMealCheck('lunch')" class="text-xs font-semibold px-3 py-1.5 rounded-lg border transition" id="chk-btn-lunch">Log Meal</button>
+                        </div>
+
+                        <div class="flex items-center justify-between p-3.5 border rounded-xl bg-purple-50/40 border-purple-200" id="chk-card-dinner">
+                            <div class="flex items-center gap-3">
+                                <span class="text-lg" id="chk-icon-dinner">⏳</span>
+                                <div>
+                                    <h4 class="font-bold text-sm text-gray-900">Dinner</h4>
+                                    <p class="text-xs text-purple-700 font-semibold" id="chk-desc-dinner">You haven't logged it yet</p>
+                                </div>
+                            </div>
+                            <button onclick="toggleMealCheck('dinner')" class="text-xs font-semibold px-3.5 py-1.5 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition" id="chk-btn-dinner">Log Dinner</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                 <div class="lg:col-span-1 bg-white p-6 border border-gray-200 rounded-2xl shadow-sm space-y-4">
-                    <h2 class="text-lg font-bold text-gray-900 mb-1">Log Food & Meals</h2>
-                    <p class="text-xs text-gray-500 mb-2">Record your daily meal intakes to update caloric and macro totals.</p>
+                    <h2 class="text-lg font-bold text-gray-900 mb-1">Custom Food Logger</h2>
                     <form onsubmit="handleFoodLog(event)" class="space-y-3">
                         <div>
                             <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Meal / Item Name</label>
-                            <input type="text" id="food-name" placeholder="e.g. Protein Smoothie" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                            <input type="text" id="food-name" placeholder="e.g. Greek Yogurt Bowl" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div>
                                 <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Calories (kcal)</label>
-                                <input type="number" id="food-cals" placeholder="350" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                                <input type="number" id="food-cals" placeholder="480" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
                             </div>
                             <div>
                                 <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Protein (g)</label>
-                                <input type="number" id="food-prot" placeholder="30" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
+                                <input type="number" id="food-prot" placeholder="40" required class="w-full border-gray-300 border rounded-lg p-2 text-sm focus:ring-purple-500 focus:border-purple-500 bg-white">
                             </div>
                         </div>
                         <button type="submit" class="w-full bg-purple-600 text-white font-semibold py-2.5 px-4 rounded-xl text-sm hover:bg-purple-700 transition shadow-sm">
-                            + Add to Food Log
+                            + Add Custom Meal Intake
                         </button>
                     </form>
                 </div>
 
                 <div class="lg:col-span-1 bg-white p-6 border border-gray-200 rounded-2xl shadow-sm space-y-4">
-                    <h2 class="text-lg font-bold text-gray-900 mb-1">Log Exercise</h2>
-                    <p class="text-xs text-gray-500 mb-2">Manually record workouts to calculate total energy burn.</p>
+                    <h2 class="text-lg font-bold text-gray-900 mb-1">Exercise Logger</h2>
                     <form onsubmit="handleManualLog(event)" class="space-y-3">
                         <div>
                             <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">Activity Type</label>
@@ -404,56 +516,43 @@
                     </div>
                 </div>
             </div>
-
-            <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-lg font-bold text-gray-900">Historical Macro & Activity Calendar</h2>
-                        <p class="text-xs text-gray-500">Track daily adherence across recent weeks</p>
-                    </div>
-                    <span class="text-xs bg-purple-100 text-purple-800 font-semibold px-3 py-1 rounded-full">August 2026</span>
-                </div>
-
-                <div class="grid grid-cols-7 gap-2 text-center text-xs font-semibold text-gray-400 mb-2">
-                    <div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div><div>SUN</div>
-                </div>
-
-                <div class="grid grid-cols-7 gap-2 text-xs">
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-100 opacity-40">24</div>
-                    <div class="bg-purple-50 p-3 rounded-xl border border-purple-200 text-left">
-                        <div class="font-bold text-purple-900 mb-1">25</div>
-                        <div class="text-[10px] text-gray-500">In: 2,100 kcal</div>
-                        <div class="text-[10px] text-emerald-600 font-semibold">Out: 520 kcal</div>
-                    </div>
-                    <div class="bg-purple-50 p-3 rounded-xl border border-purple-200 text-left">
-                        <div class="font-bold text-purple-900 mb-1">26</div>
-                        <div class="text-[10px] text-gray-500">In: 1,950 kcal</div>
-                        <div class="text-[10px] text-emerald-600 font-semibold">Out: 340 kcal</div>
-                    </div>
-                    <div class="bg-purple-600 text-white p-3 rounded-xl text-left shadow-md">
-                        <div class="font-bold mb-1">27 (Today)</div>
-                        <div class="text-[10px] text-purple-100">In: 1,450 kcal</div>
-                        <div class="text-[10px] text-emerald-300 font-bold">Out: 480 kcal</div>
-                    </div>
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 text-left">
-                        <div class="font-bold text-gray-700 mb-1">28</div>
-                        <div class="text-[10px] text-gray-400">Planned</div>
-                    </div>
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 text-left">
-                        <div class="font-bold text-gray-700 mb-1">29</div>
-                        <div class="text-[10px] text-gray-400">Planned</div>
-                    </div>
-                    <div class="bg-gray-50 p-3 rounded-xl border border-gray-200 text-left">
-                        <div class="font-bold text-gray-700 mb-1">30</div>
-                        <div class="text-[10px] text-gray-400">Planned</div>
-                    </div>
-                </div>
-            </div>
         </section>
 
     </main>
 
     <script>
+        // Dynamic Suggestions Collection for Landing Page Switch
+        const suggestedDinners = [
+            {
+                title: "Sheet-Pan Chicken Teriyaki & Broccoli",
+                desc: "High-protein Asian dinner with fresh greens and rice. Matches your exercise target!",
+                time: "25 mins",
+                cals: "580 kcal"
+            },
+            {
+                title: "One Pot Garlic Salmon & Quinoa Bowl",
+                desc: "Rich in Omega-3 & antioxidants. Matches your high-protein hypertrophy target perfectly!",
+                time: "30 mins",
+                cals: "650 kcal"
+            },
+            {
+                title: "Skillet Beef Stir-Fry with Peppers",
+                desc: "Quick high-iron workout recovery meal with crisp vegetables and noodles.",
+                time: "22 mins",
+                cals: "520 kcal"
+            }
+        ];
+        let currentSuggestionIndex = 0;
+
+        function cycleDinnerSuggestion() {
+            currentSuggestionIndex = (currentSuggestionIndex + 1) % suggestedDinners.length;
+            const item = suggestedDinners[currentSuggestionIndex];
+            document.getElementById('suggested-title').innerText = item.title;
+            document.getElementById('suggested-desc').innerText = item.desc;
+            document.getElementById('suggested-time').innerText = item.time;
+            document.getElementById('suggested-cals').innerText = item.cals;
+        }
+
         // Digital Twin Inventory Data
         let inventoryData = [
             { id: 1, zone: 'Fridge', name: 'Chicken Thighs', opened: '2026-08-25', expiry: '2026-08-29' },
@@ -463,7 +562,7 @@
             { id: 5, zone: 'Spice Rack', name: 'Teriyaki Sauce', opened: '2026-02-10', expiry: '2027-06-01' }
         ];
 
-        // Recipe Database Mock Data with Scalable Base Quantities & Costs
+        // Recipe Database Mock Data
         let recipesData = [
             {
                 id: "RCP-001",
@@ -527,6 +626,19 @@
             }
         ];
 
+        // State variables for macros & daily goals
+        let targetCals = 2200;
+        let targetProtein = 140;
+        let eatenCals = 1450;
+        let eatenProtein = 98;
+        let burnedCals = 480;
+
+        const mealChecklistState = {
+            breakfast: { logged: true, name: "Oatmeal & Protein Shake", cals: 450 },
+            lunch: { logged: true, name: "Chicken Salad Wrap", cals: 520 },
+            dinner: { logged: false, name: "", cals: 0 }
+        };
+
         const TODAY = new Date('2026-08-27');
 
         // Navigation Controller
@@ -551,6 +663,88 @@
             navigateTo('home');
         }
 
+        // Save Fitness Goals & Biometrics
+        function saveFitnessGoals(e) {
+            e.preventDefault();
+            targetCals = parseInt(document.getElementById('goal-cals').value) || 2200;
+            targetProtein = parseInt(document.getElementById('goal-protein').value) || 140;
+            updateMacroUI();
+            alert("Fitness goals updated successfully.");
+        }
+
+        // Toggle Meal Checklist State
+        function toggleMealCheck(mealKey) {
+            const item = mealChecklistState[mealKey];
+            if (mealKey === 'dinner' && !item.logged) {
+                // Log dinner using current suggested dinner item
+                const suggested = suggestedDinners[currentSuggestionIndex];
+                item.logged = true;
+                item.name = suggested.title;
+                item.cals = 580;
+                eatenCals += item.cals;
+                eatenProtein += 45;
+            } else {
+                item.logged = !item.logged;
+            }
+            renderMealChecklistUI();
+            updateMacroUI();
+        }
+
+        // Render Meal Checklist UI
+        function renderMealChecklistUI() {
+            ['breakfast', 'lunch', 'dinner'].forEach(meal => {
+                const item = mealChecklistState[meal];
+                const card = document.getElementById(`chk-card-${meal}`);
+                const icon = document.getElementById(`chk-icon-${meal}`);
+                const desc = document.getElementById(`chk-desc-${meal}`);
+                const btn = document.getElementById(`chk-btn-${meal}`);
+
+                if (item.logged) {
+                    card.className = "flex items-center justify-between p-3.5 border rounded-xl bg-emerald-50/40 border-emerald-200";
+                    icon.innerText = "✅";
+                    desc.innerText = `${item.name} (${item.cals} kcal)`;
+                    desc.className = "text-xs text-emerald-800 font-semibold";
+                    btn.innerText = "Logged";
+                    btn.className = "text-xs font-semibold px-3 py-1.5 rounded-lg border border-emerald-300 text-emerald-800 bg-white hover:bg-emerald-100 transition";
+                } else {
+                    card.className = "flex items-center justify-between p-3.5 border rounded-xl bg-purple-50/40 border-purple-200";
+                    icon.innerText = "⏳";
+                    desc.innerText = "You haven't logged it yet";
+                    desc.className = "text-xs text-purple-700 font-semibold";
+                    btn.innerText = `Log ${meal.charAt(0).toUpperCase() + meal.slice(1)}`;
+                    btn.className = "text-xs font-semibold px-3.5 py-1.5 rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition";
+                }
+            });
+        }
+
+        // Dynamic Macro & Proximity Tracker Sync
+        function updateMacroUI() {
+            const calPct = Math.min(100, Math.round((eatenCals / targetCals) * 100));
+            const protPct = Math.min(100, Math.round((eatenProtein / targetProtein) * 100));
+            const burnPct = Math.min(100, Math.round((burnedCals / 500) * 100));
+            const remaining = Math.max(0, targetCals - eatenCals + burnedCals);
+
+            // Home Summary
+            document.getElementById('sum-eaten').innerHTML = `${eatenCals.toLocaleString()} <span class="text-xs font-normal text-gray-500">/ ${targetCals.toLocaleString()} kcal</span>`;
+            document.getElementById('sum-protein').innerHTML = `${eatenProtein}g <span class="text-xs font-normal text-gray-500">/ ${targetProtein}g</span>`;
+            document.getElementById('sum-burned').innerHTML = `${burnedCals} <span class="text-xs font-normal text-gray-500">kcal</span>`;
+            document.getElementById('sum-net').innerHTML = `${remaining.toLocaleString()} <span class="text-xs font-normal text-gray-500">kcal remaining</span>`;
+
+            document.getElementById('prog-eaten').style.width = `${calPct}%`;
+            document.getElementById('prog-protein').style.width = `${protPct}%`;
+            document.getElementById('prog-burned').style.width = `${burnPct}%`;
+
+            // Proximity Tracker on Fitness Diary
+            document.getElementById('prox-cal-text').innerText = `${eatenCals.toLocaleString()} / ${targetCals.toLocaleString()} kcal (${calPct}%)`;
+            document.getElementById('prox-cal-bar').style.width = `${calPct}%`;
+
+            document.getElementById('prox-prot-text').innerText = `${eatenProtein}g / ${targetProtein}g (${protPct}%)`;
+            document.getElementById('prox-prot-bar').style.width = `${protPct}%`;
+
+            document.getElementById('prox-burn-text').innerText = `${burnedCals} / 500 kcal (${burnPct}%)`;
+            document.getElementById('prox-burn-bar').style.width = `${burnPct}%`;
+        }
+
         // Adjust Portion Servings Dynamic Scaler
         function adjustServings(recipeId, delta) {
             const recipe = recipesData.find(r => r.id === recipeId);
@@ -560,7 +754,7 @@
             }
         }
 
-        // Render Recipe Database Cards & Match against Digital Twin
+        // Render Recipe Cards
         function renderRecipes() {
             const search = document.getElementById('recipe-search').value.toLowerCase();
             const fltProtein = document.getElementById('flt-protein').value;
@@ -570,7 +764,6 @@
             const fltInventory = document.getElementById('flt-inventory').value;
             const fltSort = document.getElementById('flt-sort').value;
 
-            // Current inventory item names normalized
             const inStockNames = inventoryData.map(i => i.name.toLowerCase());
 
             let filtered = recipesData.filter(r => {
@@ -581,7 +774,6 @@
                 const totalTime = r.prepMin + r.cookMin;
                 const matchesTime = (fltTime === 'Any') || (totalTime <= parseInt(fltTime));
 
-                // Stock matching
                 const inStockCount = r.ingredients.filter(ing => inStockNames.some(stock => stock.includes(ing.name.toLowerCase()))).length;
                 const is100Percent = inStockCount === r.ingredients.length;
                 const matchesInv = (fltInventory === 'All') || (fltInventory === '100' && is100Percent);
@@ -589,7 +781,6 @@
                 return matchesSearch && matchesProtein && matchesCookware && matchesTier && matchesTime && matchesInv;
             });
 
-            // Sorting logic
             if (fltSort === 'CalLow') filtered.sort((a,b) => a.baseCals - b.baseCals);
             if (fltSort === 'CalHigh') filtered.sort((a,b) => b.baseCals - a.baseCals);
             if (fltSort === 'ProteinHigh') filtered.sort((a,b) => b.baseProtein - a.baseProtein);
@@ -731,17 +922,15 @@
             renderRecipes();
         }
 
-        // Food Logger
+        // Custom Food Logger
         function handleFoodLog(e) {
             e.preventDefault();
             const cals = parseInt(document.getElementById('food-cals').value) || 0;
             const prot = parseInt(document.getElementById('food-prot').value) || 0;
 
-            const curEaten = parseInt(document.getElementById('sum-eaten').innerText) || 0;
-            const curProt = parseInt(document.getElementById('sum-protein').innerText) || 0;
-
-            document.getElementById('sum-eaten').innerText = `${curEaten + cals} `;
-            document.getElementById('sum-protein').innerText = `${curProt + prot}g `;
+            eatenCals += cals;
+            eatenProtein += prot;
+            updateMacroUI();
 
             alert(`Logged ${document.getElementById('food-name').value} (+${cals} kcal, +${prot}g Protein).`);
             document.getElementById('food-name').value = '';
@@ -749,15 +938,14 @@
             document.getElementById('food-prot').value = '';
         }
 
-        // Exercise Logger
+        // Manual Exercise Logger
         function handleManualLog(e) {
             e.preventDefault();
             const burn = parseInt(document.getElementById('ex-calories').value) || 0;
-            const currentBurn = parseInt(document.getElementById('sum-burned').innerText) || 0;
-            const newTotalBurn = currentBurn + burn;
+            burnedCals += burn;
+            updateMacroUI();
 
-            document.getElementById('sum-burned').innerText = newTotalBurn;
-            alert(`Logged activity. Total exercise burn updated to ${newTotalBurn} kcal.`);
+            alert(`Logged activity. Total exercise burn updated to ${burnedCals} kcal.`);
         }
 
         function toggleSync(provider) {
@@ -778,6 +966,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderRecipes();
             renderDigitalTwin();
+            renderMealChecklistUI();
+            updateMacroUI();
             document.getElementById('inv-opened').value = '2026-08-27';
             document.getElementById('inv-expiry').value = '2026-08-31';
         });
